@@ -1,0 +1,5 @@
+# Deny direct access to application directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(app|core|config|storage)/ - [F,L]
+</IfModule>
