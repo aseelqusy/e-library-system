@@ -10,7 +10,10 @@
                 <h2>🏷️ Manage Categories</h2>
                 <p class="text-muted text-sm"><?= count($categories) ?> categories</p>
             </div>
-            <button class="btn btn-primary" onclick="document.getElementById('add-cat-modal').classList.add('active')">+ Add Category</button>
+            <button class="btn btn-primary"
+                    onclick="document.getElementById('add-cat-modal').classList.add('show'); document.body.style.overflow='hidden';">
+                + Add Category
+            </button>
         </div>
 
         <!-- Categories Grid -->
@@ -20,7 +23,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                     <div>
                         <h3><?= e($cat['name']) ?></h3>
-                        <p class="text-muted text-sm mb-2"><?= e($cat['description']) ?></p>
+                        <p class="text-muted text-sm mb-2"><?= e($cat['description'] ?? '') ?></p>
                         <span class="chip chip-outline"><?= $counts[$cat['id']] ?? 0 ?> books</span>
                     </div>
                     <span style="font-size:32px;"><?= $cat['icon'] ?? '📁' ?></span>
@@ -32,7 +35,8 @@
                             data-description="<?= e($cat['description'] ?? '') ?>"
                             data-icon="<?= e($cat['icon'] ?? '') ?>"
                             onclick="editCategory(this)">✏️ Edit</button>
-                    <button class="btn btn-ghost btn-sm btn-danger-text" onclick="deleteCategory(<?= $cat['id'] ?>, '<?= e($cat['name']) ?>')">🗑 Delete</button>
+                    <button class="btn btn-ghost btn-sm btn-danger-text"
+                            onclick="deleteCategory(<?= $cat['id'] ?>, '<?= e($cat['name']) ?>')">🗑 Delete</button>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -40,13 +44,13 @@
     </main>
 </div>
 
-<!-- Add Category Modal -->
-<div class="modal" id="add-cat-modal">
-    <div class="modal-overlay" onclick="this.parentElement.classList.remove('active')"></div>
-    <div class="modal-content glass-card" style="max-width:450px;">
+<!-- ── Add Category Modal ─────────────────────────────────────── -->
+<div class="modal-overlay" id="add-cat-modal">
+    <div class="modal" style="max-width:450px;">
         <div class="modal-header">
             <h3>Add New Category</h3>
-            <button class="btn btn-ghost btn-icon modal-close" onclick="this.closest('.modal').classList.remove('active')">✕</button>
+            <button class="btn btn-ghost btn-icon modal-close"
+                    onclick="closeModal('add-cat-modal')">✕</button>
         </div>
         <form action="<?= url('admin/categories/store') ?>" method="POST">
             <?= Csrf::field() ?>
@@ -65,20 +69,21 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').classList.remove('active')">Cancel</button>
+                <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('add-cat-modal')">Cancel</button>
                 <button type="submit" class="btn btn-primary">Add Category</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Edit Category Modal -->
-<div class="modal" id="edit-cat-modal">
-    <div class="modal-overlay" onclick="this.parentElement.classList.remove('active')"></div>
-    <div class="modal-content glass-card" style="max-width:450px;">
+<!-- ── Edit Category Modal ────────────────────────────────────── -->
+<div class="modal-overlay" id="edit-cat-modal">
+    <div class="modal" style="max-width:450px;">
         <div class="modal-header">
             <h3>Edit Category</h3>
-            <button class="btn btn-ghost btn-icon modal-close" onclick="this.closest('.modal').classList.remove('active')">✕</button>
+            <button class="btn btn-ghost btn-icon modal-close"
+                    onclick="closeModal('edit-cat-modal')">✕</button>
         </div>
         <form id="edit-cat-form">
             <?= Csrf::field() ?>
@@ -98,7 +103,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').classList.remove('active')">Cancel</button>
+                <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('edit-cat-modal')">Cancel</button>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </form>
@@ -106,31 +112,52 @@
 </div>
 
 <script>
-function editCategory(button) {
-    document.getElementById('edit-cat-id').value = button.dataset.id;
-    document.getElementById('edit-cat-name').value = button.dataset.name;
-    document.getElementById('edit-cat-description').value = button.dataset.description || '';
-    document.getElementById('edit-cat-icon').value = button.dataset.icon || '';
-    document.getElementById('edit-cat-modal').classList.add('active');
+const BASE  = document.querySelector('meta[name="base-url"]')?.content  || '';
+const TOKEN = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+    document.body.style.overflow = '';
 }
 
-document.getElementById('edit-cat-form')?.addEventListener('submit', (e) => {
+// Close modal on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+        if (e.target === this) closeModal(this.id);
+    });
+});
+
+function editCategory(button) {
+    document.getElementById('edit-cat-id').value          = button.dataset.id;
+    document.getElementById('edit-cat-name').value        = button.dataset.name;
+    document.getElementById('edit-cat-description').value = button.dataset.description || '';
+    document.getElementById('edit-cat-icon').value        = button.dataset.icon        || '';
+
+    document.getElementById('edit-cat-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+document.getElementById('edit-cat-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const base = document.querySelector('meta[name="base-url"]')?.content || '';
     const form = e.currentTarget;
     const data = new URLSearchParams(new FormData(form));
+    // FormData picks up the hidden _token field from Csrf::field()
+    // but also make sure the meta token is included as fallback
+    if (!data.has('_token') || !data.get('_token')) {
+        data.set('_token', TOKEN);
+    }
 
-    fetch(base + '/admin/categories/update', {
-        method: 'POST',
+    fetch(BASE + '/admin/categories/update', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: data.toString()
+        body:    data.toString()
     })
     .then(r => r.json())
-    .then(data => {
-        if (data.success) {
+    .then(res => {
+        if (res.success) {
             window.location.reload();
         } else {
-            window.LuminApp?.Toast?.show(data.message || 'Update failed.', 'error');
+            window.LuminApp?.Toast?.show(res.message || 'Update failed.', 'error');
         }
     })
     .catch(() => window.LuminApp?.Toast?.show('Update failed.', 'error'));
@@ -139,20 +166,17 @@ document.getElementById('edit-cat-form')?.addEventListener('submit', (e) => {
 function deleteCategory(id, name) {
     if (!confirm('Delete category "' + name + '"? Books in this category will become uncategorized.')) return;
 
-    const base = document.querySelector('meta[name="base-url"]')?.content || '';
-    const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
-
-    fetch(base + '/admin/categories/delete', {
-        method: 'POST',
+    fetch(BASE + '/admin/categories/delete', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id=${id}&_token=${encodeURIComponent(token)}`
+        body:    'id=' + id + '&_token=' + encodeURIComponent(TOKEN)
     })
     .then(r => r.json())
-    .then(data => {
-        if (data.success) {
+    .then(res => {
+        if (res.success) {
             window.location.reload();
         } else {
-            window.LuminApp?.Toast?.show(data.message || 'Delete failed.', 'error');
+            window.LuminApp?.Toast?.show(res.message || 'Delete failed.', 'error');
         }
     })
     .catch(() => window.LuminApp?.Toast?.show('Delete failed.', 'error'));

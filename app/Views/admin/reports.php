@@ -104,9 +104,37 @@
 </div>
 
 <script>
-function exportReport(type, format) {
-    window.LuminApp?.Toast?.show('Export (' + format.toUpperCase() + ') coming with database integration', 'info');
-}
+    function exportReport(type, format) {
+        // 1. التحقق إذا كان الطلب لـ PDF (تنبيه بعدم الدعم حالياً لتوفير المكتبات)
+        if (format === 'pdf') {
+            if (window.LuminApp?.Toast?.show) {
+                window.LuminApp.Toast.show('PDF format is coming soon! Please use CSV download.', 'info');
+            } else {
+                alert('PDF format is coming soon! Please use CSV download.');
+            }
+            return;
+        }
+
+        // 2. جلب الرابط الأساسي للمشروع من الوسم meta المتواجد بالـ Header
+        const baseUrlElement = document.querySelector('meta[name="base-url"]');
+        const baseUrl = baseUrlElement ? baseUrlElement.content : '';
+
+        // 3. بناء الرابط الموجه للـ Controller المخصص للتقارير
+        // المسار المعتمد: baseUrl + /admin/reports/export?type=...&format=csv
+        const exportUrl = `${baseUrl}/admin/reports/export?type=${type}&format=${format}`;
+
+        if (window.LuminApp?.Toast?.show) {
+            window.LuminApp.Toast.show('Preparing your report download...', 'success');
+        }
+
+        // 4. إجبار المتصفح على فتح الرابط في نافذة مخفية لبدء التنزيل التلقائي دون قفز أو وميض بالصفحة
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.href = exportUrl;
+        downloadAnchor.style.display = 'none';
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+    }
 </script>
 
 <?php View::includeLayout('footer'); ?>

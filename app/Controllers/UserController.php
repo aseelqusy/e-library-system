@@ -118,4 +118,81 @@ class UserController extends Controller {
             'layout' => 'public',
         ]);
     }
+
+    public function updatePassword(): void {
+        // فرض تسجيل الدخول أولاً قبل أي إجراء
+        $this->requireAuth();
+
+        // التحقق من توكن الحماية باستخدام الدالة المدمجة بمشروعك
+        if (!$this->validateCsrf()) {
+            setFlash('error', 'Invalid security token request.');
+            $this->redirect('user/profile');
+            return;
+        }
+
+        // استقبال البيانات القادمة من الـ Form
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword     = $_POST['new_password'] ?? '';
+
+        // جلب بيانات المستخدم الحالي عبر الموديل والمُعرّف المخزن في الجلسة Auth::id()
+        require_once APP_PATH . '/Models/User.php';
+        $userId = Auth::id();
+        $user = User::find($userId);
+
+        // التحقق من صحة كلمة المرور الحالية المخزنة في الـ DB (bcrypt)
+        if (!$user || !password_verify($currentPassword, $user['password'])) {
+            setFlash('error', 'Current password is incorrect.');
+            $this->redirect('user/profile');
+            return;
+        }
+
+        // تشفير كلمة المرور الجديدة وتحديثها في قاعدة البيانات
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+        // استخدام دالة التحديث المدعومة في نظام الـ Auth الخاص بمشروعك
+        $updated = Auth::updateUser($userId, [
+            'password' => $hashedPassword
+        ]);
+
+        if ($updated) {
+            setFlash('success', 'Password updated successfully!');
+        } else {
+            setFlash('error', 'Failed to update password. Please try again.');
+        }
+
+        $this->redirect('user/profile');
+    }
+
+    public function deleteAccount(): void {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            setFlash('error', 'Invalid security token request.');
+            $this->redirect('user/profile');
+            return;
+        }
+
+        require_once APP_PATH . '/Models/User.php';
+        $userId = Auth::id();
+
+        // تحديث حالة الحساب إلى غير نشط (is_active = 0) بناءً على الـ Schema الخاصة بك
+        $deleted = Auth::updateUser($userId, [
+            'is_active' => 0
+        ]);
+
+        if ($deleted) {
+            // تسجيل الخروج التلقائي بعد تعطيل الحساب
+            Auth::logout();
+
+            // بدء جلسة جديدة لإظهار توبست النجاح على الصفحة الرئيسية
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            setFlash('success', 'Your account has been deleted successfully.');
+            $this->redirect('home');
+        } else {
+            setFlash('error', 'Failed to delete account.');
+            $this->redirect('user/profile');
+        }
+    }
 }

@@ -77,4 +77,75 @@ class BorrowController extends Controller {
             'message' => 'Book reserved! We\'ll notify you when it\'s available.',
         ]);
     }
+
+    /* ═══════════════════════════════════════════════════════
+       ADMIN METHODS (المطلوبة لـ لوحة التحكم والجدول لتجنب الـ 403 والـ HTML)
+       ═══════════════════════════════════════════════════════ */
+
+    public function approve(): void {
+        // تأكيد الصلاحيات والـ CSRF
+        $this->requireAuth();
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Security token invalid.'], 403);
+        }
+
+        require_once APP_PATH . '/Models/Borrow.php';
+        require_once APP_PATH . '/Models/Book.php';
+
+        $id = (int)($_POST['id'] ?? 0);
+        $borrow = Borrow::find($id);
+
+        if (!$borrow) {
+            $this->json(['success' => false, 'message' => 'Record not found.'], 404);
+        }
+
+        // تحديث حالة الحجز التمهيدي ليصبح استعارة نشطة (Active)
+        Borrow::updateStatus($id, 'active');
+        // تقليل الكمية المتاحة من الكتاب بالمستودع بمقدار 1
+        Book::adjustAvailable((int)$borrow['book_id'], -1);
+
+        $this->json(['success' => true, 'message' => 'Reservation approved and active now!']);
+    }
+
+    public function reject(): void {
+        $this->requireAuth();
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Security token invalid.'], 403);
+        }
+
+        require_once APP_PATH . '/Models/Borrow.php';
+
+        $id = (int)($_POST['id'] ?? 0);
+        $borrow = Borrow::find($id);
+
+        if (!$borrow) {
+            $this->json(['success' => false, 'message' => 'Record not found.'], 404);
+        }
+
+        Borrow::updateStatus($id, 'rejected');
+
+        $this->json(['success' => true, 'message' => 'Reservation has been rejected.']);
+    }
+
+    public function adminReturn(): void {
+        $this->requireAuth();
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Security token invalid.'], 403);
+        }
+
+        require_once APP_PATH . '/Models/Borrow.php';
+        require_once APP_PATH . '/Models/Book.php';
+
+        $id = (int)($_POST['id'] ?? 0);
+        $borrow = Borrow::find($id);
+
+        if (!$borrow) {
+            $this->json(['success' => false, 'message' => 'Record not found.'], 404);
+        }
+
+        Borrow::updateStatus($id, 'returned', date('Y-m-d'));
+        Book::adjustAvailable((int)$borrow['book_id'], 1);
+
+        $this->json(['success' => true, 'message' => 'Book marked as returned successfully.']);
+    }
 }

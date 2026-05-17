@@ -15,19 +15,20 @@
             <div class="card glass-card" style="padding:24px;">
                 <h3 class="mb-4">General</h3>
                 <form id="general-settings">
+                    <input type="hidden" name="csrf_token" value="<?= Csrf::token() ?>">
                     <div class="form-group">
                         <label class="form-label">Application Name</label>
-                        <input type="text" class="form-control" value="<?= e(APP_NAME) ?>" name="app_name">
+                        <input type="text" class="form-control" value="<?= e($settings['app_name'] ?? 'Luminara Library') ?>" name="app_name">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Max Borrow Days</label>
-                        <input type="number" class="form-control" value="14" name="max_borrow_days" min="1" max="90">
+                        <input type="number" class="form-control" value="<?= e($settings['max_borrow_days'] ?? '14') ?>" name="max_borrow_days" min="1" max="90">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Max Books Per User</label>
-                        <input type="number" class="form-control" value="5" name="max_books" min="1" max="20">
+                        <input type="number" class="form-control" value="<?= e($settings['max_books_per_user'] ?? '5') ?>" name="max_books_per_user" min="1" max="10">
                     </div>
-                    <button type="button" class="btn btn-primary" onclick="saveSettings('general')">Save Changes</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSettings('general', event)">Save Changes</button>
                 </form>
             </div>
 
@@ -132,8 +133,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function saveSettings(section) {
-    window.LuminApp?.Toast?.show('Settings saved.', 'success');
+function saveSettings(section, event) {
+    if (event) event.preventDefault(); // منع المتصفح من إلغاء الطلب 🛑
+
+    const form = document.getElementById(`${section}-settings`);
+    if (!form) return;
+
+    // باقي كود الـ fetch كما هو بدون تغيير...
+
+    // تجميع البيانات من الحقول تلقائياً بما فيها توكن الحماية
+    const formData = new FormData(form);
+
+    // إرسال البيانات إلى الـ Controller الخاص بالإعدادات
+    fetch(`${window.LuminApp?.baseUrl || '/library-app/public'}/admin/settings`, {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => {
+            if (response.ok) {
+                window.LuminApp?.Toast?.show('General settings saved successfully! 💾', 'success');
+            } else {
+                window.LuminApp?.Toast?.show('Failed to save settings. ❌', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            window.LuminApp?.Toast?.show('An error occurred while saving.', 'error');
+        });
 }
 function setTheme(theme) {
     window.LuminApp?.Toast?.show('Theme switching coming in a future update', 'info');

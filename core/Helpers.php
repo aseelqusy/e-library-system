@@ -77,3 +77,40 @@ function status_chip(string $status): string {
     $color = $colors[$status] ?? 'muted';
     return '<span class="chip chip-' . $color . '">' . ucfirst(e($status)) . '</span>';
 }
+
+function get_book_cover_cached(?string $coverImage, ?string $isbn): ?string {
+    $coverImage = trim($coverImage ?? '');
+    $isbn = trim($isbn ?? '');
+
+    // 1. إذا كانت هناك صورة مرفوعة ومخزنة في قاعدة البيانات
+    if (!empty($coverImage) && preg_match('/\.(jpg|jpeg|png|webp|gif)$/i', $coverImage)) {
+        if (strpos($coverImage, 'uploads/') !== false) {
+            return url(ltrim($coverImage, '/'));
+        }
+        return url('uploads/images/' . ltrim($coverImage, '/'));
+    }
+
+    // 2. إذا اعتمدنا على الـ ISBN
+    if (!empty($isbn)) {
+        // تحويل الأرقام وتنظيفها
+        $arabic_eastern = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        $arabic_western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $cleanIsbn = str_replace($arabic_eastern, $arabic_western, $isbn);
+        $cleanIsbn = preg_replace('/[^0-9]/', '', $cleanIsbn);
+
+        $fileName = "isbn-" . $cleanIsbn . ".jpg";
+
+        $localFile = $_SERVER['DOCUMENT_ROOT'] . BASE_URL . '/uploads/covers/' . $fileName;
+        if (!file_exists($localFile)) {
+            $localFile = dirname(__DIR__) . '/public/uploads/covers/' . $fileName;
+        }
+
+        // إذا وُجد الغلاف محلياً نرجعه فوراً
+        if (file_exists($localFile)) {
+            return url("uploads/covers/" . $fileName);
+        }}
+
+        // بدلاً من الاستعانة بجوجل وظهور الصور الفارغة، نرجع null مباشرة
+        // لتظهر الأيقونة 📖 من الـ PHP مباشرة بشكل نظيف وسريع
+        return null;
+    }

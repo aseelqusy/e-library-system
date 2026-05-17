@@ -76,7 +76,19 @@ class AuthController extends Controller {
 
         if (Auth::register($name, $email, $password)) {
             setFlash('success', 'Account created! Welcome to ' . APP_NAME . '.');
-            $this->redirect('catalog');
+            try {
+                require_once APP_PATH . '/Models/Notification.php';
+                $adminId = 1; // معرف الآدمن الرئيسي
+
+                Notification::create(
+                    $adminId,
+                    "📢 New user registered: {$name} ({$email})",
+                    'admin_alert'
+                );
+            } catch (Throwable $e) {
+                error_log("Failed to send admin notification: " . $e->getMessage());
+            }
+            $this->redirect('login');
         }
 
         setFlash('error', 'Email already registered.');

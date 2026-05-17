@@ -49,16 +49,19 @@
                     <?php else: ?>
                         <?php foreach ($books as $book):
                             $catName = $categories[$book['category_id']]['name'] ?? 'General';
-                            $coverPath = !empty($book['cover_image'] ?? $book['cover'] ?? '') ? url(ltrim($book['cover_image'] ?? $book['cover'] ?? '', '/')) : null;
+                            $coverPath = get_book_cover_cached($book['cover_image'] ?? $book['cover'] ?? null, $book['isbn'] ?? null);
                             ?>
                             <a href="<?= url('books/' . $book['id']) ?>" class="book-card glass-card"
                                data-title="<?= e($book['title']) ?>"
                                data-author="<?= e($book['author']) ?>"
                                data-book-title="<?= e($book['title']) ?>"
                                data-book-url="<?= url('books/' . $book['id']) ?>">
-                                <div class="book-cover">
+                                <div class="book-cover" style="display: flex; align-items: center; justify-content: center; font-size: 3rem;">
                                     <?php if ($coverPath): ?>
-                                        <img src="<?= $coverPath ?>" alt="<?= e($book['title']) ?> cover" loading="lazy">
+                                        <img src="<?= $coverPath ?>"
+                                             alt="<?= e($book['title']) ?> cover"
+                                             loading="lazy"
+                                             onerror="this.style.display='none'; this.parentElement.innerHTML='📖';">
                                     <?php else: ?>
                                         📖
                                     <?php endif; ?>

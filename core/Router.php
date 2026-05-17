@@ -85,3 +85,4 @@ class Router {
         View::render('errors/403', ['title' => '403 - Access Denied']);
     }
 }
+

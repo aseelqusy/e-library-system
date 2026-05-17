@@ -2,10 +2,20 @@
 <?php View::includeLayout('navbar'); ?>
 
 <?php
-$coverRaw = $book['cover_image'] ?? $book['cover'] ?? '';
 $pdfRaw   = $book['pdf_file'] ?? '';
-$coverPath = !empty($coverRaw) ? url(ltrim($coverRaw, '/')) : null;
-$pdfPath   = !empty($pdfRaw)   ? url(ltrim($pdfRaw,   '/')) : null;
+$pdfPath   = !empty($pdfRaw) ? url(ltrim($pdfRaw, '/')) : null;
+
+
+$coverRaw = $book['cover_image'] ?? $book['cover'] ?? '';
+
+
+if (empty($coverRaw)) {
+
+    $coverPath = get_book_cover_cached($book['cover_image'] ?? null, $book['isbn'] ?? null);
+} else {
+
+    $coverPath = url(ltrim($coverRaw, '/'));
+}
 ?>
 
     <div class="page-wrapper" style="padding-top: var(--navbar-height);">
@@ -132,9 +142,23 @@ $pdfPath   = !empty($pdfRaw)   ? url(ltrim($pdfRaw,   '/')) : null;
                     <div class="book-grid">
                         <?php foreach ($similar as $s):
                             if ($s['id'] === $book['id']) continue;
+
+                            // تجهيز مسار الصورة لكل كتاب متشابه بنفس المنطق الذكي
+                            $sCoverRaw = $s['cover_image'] ?? $s['cover'] ?? '';
+                            if (empty($sCoverRaw)) {
+                                $sCoverPath = get_book_cover_cached($s['cover_image'] ?? null, $s['isbn'] ?? null);
+                            } else {
+                                $sCoverPath = url(ltrim($sCoverRaw, '/'));
+                            }
                             ?>
-                            <a href="<?= url('books/' . $s['id']) ?>" class="book-card glass-card">
-                                <div class="book-cover">📖</div>
+                            <a href="<?= url('catalog/book/' . $s['id']) ?>" class="book-card glass-card">
+                                <div class="book-cover">
+                                    <?php if ($sCoverPath): ?>
+                                        <img src="<?= $sCoverPath ?>" alt="<?= e($s['title']) ?> cover" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+                                    <?php else: ?>
+                                        📖
+                                    <?php endif; ?>
+                                </div>
                                 <div class="book-info">
                                     <h4 class="book-title"><?= e($s['title']) ?></h4>
                                     <p class="book-author"><?= e($s['author']) ?></p>

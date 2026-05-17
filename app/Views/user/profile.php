@@ -68,30 +68,41 @@
                     <div class="card glass-card">
                         <div class="card-body">
                             <h3 class="mb-4">Change Password</h3>
-                            <form data-validate>
+
+                            <form method="POST" action="<?= url('user/update-password') ?>" data-validate>
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+
                                 <div class="form-group">
-                                    <label class="form-label">Current Password</label>
-                                    <input type="password" class="form-control" placeholder="Enter current password" data-rules="required">
+                                    <label class="form-label" for="current_password">Current Password</label>
+                                    <input type="password" id="current_password" name="current_password" class="form-control" placeholder="Enter current password" data-rules="required">
                                 </div>
+
                                 <div class="form-group">
-                                    <label class="form-label">New Password</label>
-                                    <input type="password" id="new_password" class="form-control" placeholder="Minimum 6 characters" data-rules="required|min:6">
+                                    <label class="form-label" for="password">New Password</label>
+                                    <input type="password" id="password" name="new_password" class="form-control" placeholder="Minimum 6 characters" data-rules="required|min:6">
                                     <div class="password-strength">
                                         <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
                                     </div>
+                                    <small class="strength-text" style="display: block; margin-top: 4px; font-size: 0.85rem;"></small>
                                 </div>
+
                                 <div class="form-group">
-                                    <label class="form-label">Confirm New Password</label>
-                                    <input type="password" class="form-control" placeholder="Repeat new password" data-rules="required|match:new_password">
+                                    <label class="form-label" for="confirm_password">Confirm New Password</label>
+                                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Repeat new password" data-rules="required|match:new_password">
                                 </div>
-                                <button type="button" class="btn btn-primary" onclick="App.Toast.show('Password change will work after DB integration.','info')">Update Password</button>
+
+                                <button type="submit" class="btn btn-primary">Update Password</button>
                             </form>
 
                             <hr style="border-color:var(--border);margin:32px 0;">
 
                             <h3 class="mb-4">Account</h3>
                             <p class="text-muted text-sm mb-4">Member since: <?= !empty($user['created_at']) ? formatDate($user['created_at']) : 'N/A' ?></p>
-                            <button class="btn btn-danger btn-sm" onclick="App.Toast.show('Account deletion will be available after DB integration.','warning')">Delete Account</button>
+
+                            <form method="POST" action="<?= url('user/delete-account') ?>" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete Account</button>
+                            </form>
                         </div>
                     </div>
                 </div>

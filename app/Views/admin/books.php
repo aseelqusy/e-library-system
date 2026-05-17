@@ -126,9 +126,12 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Category</label>
-                            <select name="category_id" class="form-control">
+                            <select class="form-control" name="category_id" required>
+                                <option value="">Select Category</option>
                                 <?php foreach ($categories as $cat): ?>
-                                    <option value="<?= $cat['id'] ?>"><?= e($cat['name']) ?></option>
+                                    <option value="<?= $cat['id'] ?>" <?= (strtolower(trim($cat['name'])) === 'general') ? 'selected' : '' ?>>
+                                        <?= e($cat['name']) ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -253,6 +256,23 @@
             </form>
         </div>
     </div>
+    <div class="modal-overlay" id="delete-book-modal">
+        <div class="modal glass-card" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border: none; padding: 0; margin-bottom: 20px;">
+                <div style="font-size: 3rem; filter: drop-shadow(0 0 10px rgba(255, 77, 77, 0.3));">🗑️</div>
+            </div>
+            <div class="modal-body" style="padding: 0; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 10px; color: #fff;">Confirm Permanent Delete</h3>
+                <p class="text-muted">Are you sure you want to delete <span id="delete-modal-book-title" style="color: var(--text-primary); font-weight: 600;"></span>?</p>
+                <p style="color: var(--danger); font-size: 0.85rem; margin-top: 8px;">⚠️ This action cannot be undone and will clear it from the database.</p>
+                <input type="hidden" id="delete-modal-book-id">
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: center; gap: 12px; border: none; padding: 0;">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" style="font-weight: 600;" onclick="submitDeleteBook()">Delete Book</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -319,9 +339,25 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // 1. فتح النافذة الزجاجية عند الضغط على الـ 🗑️
         function deleteBook(id, title) {
-            if (!confirm('Delete "' + title + '"? This action cannot be undone.')) return;
+            const modal = document.getElementById('delete-book-modal');
+            document.getElementById('delete-modal-book-id').value = id;
+            document.getElementById('delete-modal-book-title').textContent = title;
 
+            // إضافة كلاس العرض الخاص بالفريم ورك لإظهار المودال فوراً
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('delete-book-modal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function submitDeleteBook() {
+            const id = document.getElementById('delete-modal-book-id').value;
             const base = document.querySelector('meta[name="base-url"]')?.content || '';
             const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
@@ -335,10 +371,14 @@
                     if (data.success) {
                         window.location.reload();
                     } else {
+                        closeDeleteModal();
                         window.LuminApp?.Toast?.show(data.message || 'Delete failed.', 'error');
                     }
                 })
-                .catch(() => window.LuminApp?.Toast?.show('Delete failed.', 'error'));
+                .catch(() => {
+                    closeDeleteModal();
+                    window.LuminApp?.Toast?.show('Delete failed.', 'error');
+                });
         }
     </script>
 
