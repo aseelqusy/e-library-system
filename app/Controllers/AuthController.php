@@ -34,6 +34,18 @@ class AuthController extends Controller {
         if (Auth::attempt($email, $password)) {
             session_regenerate_id(true);
             setFlash('success', 'Welcome back, ' . Auth::user()['name'] . '!');
+            try {
+                require_once APP_PATH . '/Models/Notification.php';
+                $adminId = 1;
+                $name = Auth::user()['name'] ?? 'Unknown User';
+                Notification::create(
+                    $adminId,
+                    "🔑 User logged in: {$name} has accessed their account.",
+                    'admin_alert'
+                );
+            } catch (Throwable $e) {
+                error_log('Failed to send login notification: ' . $e->getMessage());
+            }
             $this->redirect(Auth::isAdminAuthorized() ? 'admin-dashboard' : 'dashboard');
         }
 
@@ -78,8 +90,7 @@ class AuthController extends Controller {
             setFlash('success', 'Account created! Welcome to ' . APP_NAME . '.');
             try {
                 require_once APP_PATH . '/Models/Notification.php';
-                $adminId = 1; // معرف الآدمن الرئيسي
-
+                $adminId = 1;
                 Notification::create(
                     $adminId,
                     "📢 New user registered: {$name} ({$email})",

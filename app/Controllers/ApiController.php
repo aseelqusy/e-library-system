@@ -33,6 +33,7 @@ class ApiController extends Controller {
         }
 
         require_once APP_PATH . '/Models/Review.php';
+        require_once APP_PATH . '/Models/Book.php';
 
         $bookId  = (int)($_POST['book_id'] ?? 0);
         $rating  = (int)($_POST['rating'] ?? 0);
@@ -43,6 +44,21 @@ class ApiController extends Controller {
         }
 
         Review::create(Auth::id(), $bookId, $rating, $comment);
+
+        try {
+            require_once APP_PATH . '/Models/Notification.php';
+            $adminId = 1;
+            $book = Book::find($bookId);
+            $title = $book['title'] ?? 'Unknown Title';
+            $name = Auth::user()['name'] ?? 'Unknown User';
+            Notification::create(
+                $adminId,
+                "⭐ New Review! User '{$name}' left a comment and rating on: '{$title}'.",
+                'admin_alert'
+            );
+        } catch (Throwable $e) {
+            error_log('Failed to send review notification: ' . $e->getMessage());
+        }
 
         $this->json([
             'success' => true,

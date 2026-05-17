@@ -25,4 +25,11 @@ class Notification {
         $stmt->execute([$userId]);
         return (int)($stmt->fetch()['total'] ?? 0);
     }
+
+    public static function create(int $userId, string $message, string $type): void {
+        $stmt = self::db()->prepare(
+            "INSERT INTO notifications (user_id, type, message, is_read, created_at) VALUES (?, ?, ?, 0, NOW())"
+        );
+        $stmt->execute([$userId, $type, $message]);
+    }
 }

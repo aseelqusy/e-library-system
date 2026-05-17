@@ -64,6 +64,7 @@ class BorrowController extends Controller {
             $this->json(['success' => false, 'message' => 'Invalid request.'], 422);
         }
         require_once APP_PATH . '/Models/Borrow.php';
+        require_once APP_PATH . '/Models/Book.php';
 
         $bookId = (int)($_POST['book_id'] ?? 0);
         if ($bookId <= 0) {
@@ -71,6 +72,21 @@ class BorrowController extends Controller {
         }
 
         Borrow::create(Auth::id(), $bookId, 'reserved', date('Y-m-d'), date('Y-m-d', strtotime('+30 days')));
+
+        try {
+            require_once APP_PATH . '/Models/Notification.php';
+            $adminId = 1;
+            $book = Book::find($bookId);
+            $title = $book['title'] ?? 'Unknown Title';
+            $name = Auth::user()['name'] ?? 'Unknown User';
+            Notification::create(
+                $adminId,
+                "📚 New borrow request! User '{$name}' requested to borrow: '{$title}'.",
+                'borrow_request'
+            );
+        } catch (Throwable $e) {
+            error_log('Failed to send borrow request notification: ' . $e->getMessage());
+        }
 
         $this->json([
             'success' => true,

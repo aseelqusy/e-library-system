@@ -181,6 +181,26 @@ class AdminController extends Controller {
         try {
             Book::create($data);
             setFlash('success', 'Book added successfully.');
+            try {
+                require_once APP_PATH . '/Models/Notification.php';
+                require_once APP_PATH . '/Models/User.php';
+                $users = User::all();
+                foreach ($users as $user) {
+                    if (($user['role'] ?? '') !== 'member') {
+                        continue;
+                    }
+                    if (array_key_exists('is_active', $user) && (int)$user['is_active'] !== 1) {
+                        continue;
+                    }
+                    Notification::create(
+                        (int)$user['id'],
+                        "📖 New book recommendation! Check out '{$data['title']}' added to the library today.",
+                        'recommendation'
+                    );
+                }
+            } catch (Throwable $e) {
+                error_log('Failed to send new book notifications: ' . $e->getMessage());
+            }
         } catch (Throwable $e) {
             if (!empty($data['cover_image'])) $this->deleteUpload($data['cover_image']);
             if (!empty($data['pdf_file']))    $this->deleteUpload($data['pdf_file']);
@@ -481,6 +501,17 @@ class AdminController extends Controller {
                 date('Y-m-d', strtotime('+30 days'))
             );
             Book::adjustAvailable((int)$borrow['book_id'], -1);
+            try {
+                require_once APP_PATH . '/Models/Notification.php';
+                $title = $book['title'] ?? 'Unknown Title';
+                Notification::create(
+                    (int)$borrow['user_id'],
+                    "✅ Your request to borrow '{$title}' has been APPROVED. Enjoy reading!",
+                    'borrow_approved'
+                );
+            } catch (Throwable $e) {
+                error_log('Failed to send approval notification: ' . $e->getMessage());
+            }
             $this->json(['success' => true, 'message' => 'Reservation approved.']);
         } catch (Throwable $e) {
             error_log('Approve reservation failed: ' . $e->getMessage());
@@ -495,6 +526,7 @@ class AdminController extends Controller {
         }
 
         require_once APP_PATH . '/Models/Borrow.php';
+        require_once APP_PATH . '/Models/Book.php';
 
         $id     = (int)($_POST['id'] ?? 0);
         $borrow = Borrow::find($id);
@@ -509,6 +541,18 @@ class AdminController extends Controller {
         try {
             // Use 'rejected' status (requires upgraded ENUM — see upgrade_migration.sql)
             Borrow::updateStatus($id, 'rejected', date('Y-m-d'));
+            try {
+                require_once APP_PATH . '/Models/Notification.php';
+                $book = Book::find((int)$borrow['book_id']);
+                $title = $book['title'] ?? 'Unknown Title';
+                Notification::create(
+                    (int)$borrow['user_id'],
+                    "❌ Your request to borrow '{$title}' has been REJECTED. Please contact administration.",
+                    'borrow_rejected'
+                );
+            } catch (Throwable $e) {
+                error_log('Failed to send rejection notification: ' . $e->getMessage());
+            }
             $this->json(['success' => true, 'message' => 'Reservation rejected.']);
         } catch (Throwable $e) {
             error_log('Reject reservation failed: ' . $e->getMessage());
