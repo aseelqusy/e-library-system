@@ -25,6 +25,20 @@ class BorrowController extends Controller {
         Borrow::create(Auth::id(), $bookId, 'active', $borrowDate, $dueDate);
         Book::adjustAvailable($bookId, -1);
 
+        try {
+            require_once APP_PATH . '/Models/Notification.php';
+            $adminId = 1;
+            $title = $book['title'] ?? 'Unknown Title';
+            $name = Auth::user()['name'] ?? 'Unknown User';
+            Notification::create(
+                $adminId,
+                "📚 New borrow request! User '{$name}' requested to borrow: '{$title}'.",
+                'borrow_request'
+            );
+        } catch (Throwable $e) {
+            error_log('Failed to send borrow request notification: ' . $e->getMessage());
+        }
+
         $this->json([
             'success' => true,
             'message' => 'Book borrowed successfully! Due date: ' . date('M d, Y', strtotime($dueDate)),
@@ -120,6 +134,19 @@ class BorrowController extends Controller {
         // تقليل الكمية المتاحة من الكتاب بالمستودع بمقدار 1
         Book::adjustAvailable((int)$borrow['book_id'], -1);
 
+        try {
+            require_once APP_PATH . '/Models/Notification.php';
+            $book = Book::find((int)$borrow['book_id']);
+            $title = $book['title'] ?? 'Unknown Title';
+            Notification::create(
+                (int)$borrow['user_id'],
+                "✅ Your request to borrow '{$title}' has been APPROVED. Enjoy reading!",
+                'borrow_approved'
+            );
+        } catch (Throwable $e) {
+            error_log('Failed to send borrow approval notification: ' . $e->getMessage());
+        }
+
         $this->json(['success' => true, 'message' => 'Reservation approved and active now!']);
     }
 
@@ -139,6 +166,20 @@ class BorrowController extends Controller {
         }
 
         Borrow::updateStatus($id, 'rejected');
+
+        try {
+            require_once APP_PATH . '/Models/Notification.php';
+            require_once APP_PATH . '/Models/Book.php';
+            $book = Book::find((int)$borrow['book_id']);
+            $title = $book['title'] ?? 'Unknown Title';
+            Notification::create(
+                (int)$borrow['user_id'],
+                "❌ Your request to borrow '{$title}' has been REJECTED. Please contact administration.",
+                'borrow_rejected'
+            );
+        } catch (Throwable $e) {
+            error_log('Failed to send borrow rejection notification: ' . $e->getMessage());
+        }
 
         $this->json(['success' => true, 'message' => 'Reservation has been rejected.']);
     }
