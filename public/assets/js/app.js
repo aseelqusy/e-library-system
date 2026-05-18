@@ -267,11 +267,47 @@ const App = (() => {
         init() {
             const btn = document.querySelector('.notification-btn');
             const dropdown = document.querySelector('.notification-dropdown');
+            const badge = document.querySelector('.notification-badge');
             if (!btn || !dropdown) return;
 
             btn.addEventListener('click', e => {
                 e.stopPropagation();
                 dropdown.classList.toggle('show');
+
+                // Immediately hide the red unread badge for a snappy UI, then
+                // perform an async request to mark notifications as read on the server.
+                try {
+                    const hasBadge = badge && badge.textContent && badge.textContent.trim() !== '';
+                    if (hasBadge && badge.style.display !== 'none') {
+                        // Hide immediately so user sees the badge cleared without waiting.
+                        badge.style.display = 'none';
+
+                        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                        fetch(BASE + '/api/notifications/clear', {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({ csrf_token: csrf })
+                        }).then(r => r.json()).then(data => {
+                            if (data && data.success) {
+                                // Clear unread styling on items
+                                document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
+                                // Ensure badge shows zero (in case other code reads it)
+                                if (badge) badge.textContent = '0';
+                            } else {
+                                // If server failed, show badge again
+                                if (badge) badge.style.display = '';
+                            }
+                        }).catch(err => {
+                            console.error('Failed to clear notifications', err);
+                            if (badge) badge.style.display = ''; // restore
+                        });
+                    }
+                } catch (err) {
+                    console.error('Notification handler error', err);
+                }
             });
 
             document.addEventListener('click', e => {
@@ -492,3 +528,24 @@ const App = (() => {
 
     return { Toast, Modal, CommandPalette };
 })();
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+    const settingsDropdownMenu = document.getElementById('settingsDropdownMenu');
+
+    if (settingsToggleBtn && settingsDropdownMenu) {
+        // Toggle active visual state
+        settingsToggleBtn.addEventListener('click', function (event) {
+            event.stopPropagation();
+            settingsDropdownMenu.classList.toggle('show');
+        });
+
+        // Close when clicking outside framework contexts
+        window.addEventListener('click', function (event) {
+            if (!settingsToggleBtn.contains(event.target) && !settingsDropdownMenu.contains(event.target)) {
+                settingsDropdownMenu.classList.remove('show');
+            }
+        });
+    }
+});

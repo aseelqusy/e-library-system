@@ -8,15 +8,18 @@
 
 /* ── CSS Variables ─────────────────────────────────── */
 :root {
+    --bg: #06060e;
     --bg-primary: #06060e;
     --bg-secondary: #0c0c1d;
     --bg-tertiary: #12122a;
     --bg-card: #161637;
+    --navbar-bg: rgba(6, 6, 14, 0.8);
 
     --surface: rgba(255, 255, 255, 0.03);
     --surface-hover: rgba(255, 255, 255, 0.07);
 
-    --glass: rgba(255, 255, 255, 0.04);
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass: var(--glass-bg);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-hover: rgba(255, 255, 255, 0.10);
 
@@ -68,6 +71,27 @@
 
     --navbar-height: 70px;
     --sidebar-width: 260px;
+}
+
+[data-theme="light"] {
+    --bg: #f0f2f8;
+    --bg-primary: #f0f2f8;
+    --bg-secondary: #e4e7f0;
+    --bg-tertiary: #f7f8fc;
+    --bg-card: #ffffff;
+    --surface: rgba(255, 255, 255, 0.75);
+    --surface-hover: rgba(255, 255, 255, 0.95);
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass: var(--glass-bg);
+    --glass-border: rgba(124, 58, 237, 0.18);
+    --glass-hover: rgba(255, 255, 255, 0.82);
+    --text: #1a1a2e;
+    --text-secondary: #3a3a5c;
+    --text-muted: #6b6b8a;
+    --text-dim: #7a7a96;
+    --border: rgba(124, 58, 237, 0.10);
+    --border-hover: rgba(124, 58, 237, 0.22);
+    --navbar-bg: rgba(240, 242, 248, 0.85);
 }
 
 /* ── Reset ─────────────────────────────────────────── */
@@ -143,7 +167,7 @@ h4 { font-size: 1.1rem; }
 .navbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
     height: var(--navbar-height);
-    background: rgba(6, 6, 14, 0.8);
+    background: var(--navbar-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--border);
     transition: background var(--transition);
@@ -158,12 +182,19 @@ h4 { font-size: 1.1rem; }
     color: var(--text); text-decoration: none;
 }
 .navbar-brand .brand-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    border-radius: var(--radius-sm);
+    width: 60px; height: 60px;
+    background: transparent;
+    border-radius: 0;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.1rem;
-    box-shadow: 0 0 16px var(--primary-glow);
+    box-shadow: none;
+    overflow: hidden;
+}
+.navbar-brand .brand-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 .navbar-nav {
     display: flex; align-items: center; gap: 8px;
@@ -1407,4 +1438,116 @@ tr:hover td { background: var(--surface); }
     .navbar, .music-player, .floating-decorations,
     .toast-container, .command-palette-overlay { display: none !important; }
     body { background: #fff; color: #000; }
+}
+/* Container positioning */
+.settings-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Modern styling for the trigger combining text and icons */
+.nav-settings-btn {
+    background: none;
+    border: none;
+    color: #ffffff; /* White text for Navbar */
+    font-size: 15px;
+    cursor: pointer;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Spacing between icons and name */
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: 6px;
+}
+
+.nav-settings-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #edf2f7;
+}
+
+/* Subtle animation for the settings cog when hovering */
+.nav-settings-btn:hover .fa-cog {
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+/* Arrow micro-interaction style */
+.nav-arrow {
+    font-size: 11px;
+    transition: transform 0.2s ease;
+}
+
+/* The Dropdown Menu (Aligned to the right edge for LTR layouts) */
+.settings-dropdown-menu {
+    position: absolute;
+    top: 120%;
+    right: 0; /* Aligns flush to the right edge of the button */
+    background-color: #ffffff;
+    min-width: 220px;
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 6px 0;
+    z-index: 9999;
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    direction: ltr; /* English Left-to-Right orientation */
+}
+
+/* Toggle visibility class managed by JS */
+.settings-dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Rotate the arrow when menu is open */
+.settings-dropdown-container:has(.settings-dropdown-menu.show) .nav-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown inner sections styling */
+.dropdown-header {
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #a0aec0;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dropdown-item-link, .dropdown-item-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 16px;
+    color: #2d3748;
+    text-decoration: none;
+    background: none;
+    border: none;
+    font-size: 14px;
+    text-align: left; /* Text aligns to the left for English */
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.dropdown-item-link:hover, .dropdown-item-btn:hover {
+    background-color: #f7fafc;
+    color: #1a202c;
+}
+
+.dropdown-divider {
+    border: 0;
+    border-top: 1px solid #e2e8f0;
+    margin: 6px 0;
+}
+
+/* Danger logout item configuration */
+.dropdown-item-link.logout-item {
+    color: #e53e3e;
+}
+.dropdown-item-link.logout-item:hover {
+    background-color: #fff5f5;
 }

@@ -72,6 +72,50 @@ class ApiController extends Controller {
         ]);
     }
 
+    public function markNotificationsRead(): void {
+        if (!Auth::check()) {
+            $this->json(['error' => 'Unauthorized'], 401);
+        }
+        if (!$this->validateCsrf()) {
+            $this->json(['error' => 'Invalid request.'], 422);
+        }
+
+        require_once APP_PATH . '/Models/Notification.php';
+        $userId = Auth::id();
+        try {
+            Notification::markAllReadForUser($userId);
+            $this->json(['success' => true, 'message' => 'Notifications marked as read.']);
+        } catch (Throwable $e) {
+            error_log('Failed to mark notifications read: ' . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Failed to mark notifications.'], 500);
+        }
+    }
+
+    /**
+     * Lightweight API endpoint to clear (mark read) all notifications for the
+     * authenticated user. Intended for background calls from the navbar UI.
+     */
+    public function clearNotifications(): void {
+        if (!Auth::check()) {
+            $this->json(['error' => 'Unauthorized'], 401);
+        }
+        if (!$this->validateCsrf()) {
+            $this->json(['error' => 'Invalid request.'], 422);
+        }
+
+        require_once APP_PATH . '/Models/Notification.php';
+        $userId = Auth::id();
+        try {
+            // Use the new model method name; this will fall back to the old one
+            // if needed since the model provides an alias.
+            Notification::markAllAsRead($userId);
+            $this->json(['success' => true]);
+        } catch (Throwable $e) {
+            error_log('Failed to clear notifications: ' . $e->getMessage());
+            $this->json(['success' => false], 500);
+        }
+    }
+
     public function book(string $id): void {
         require_once APP_PATH . '/Models/Book.php';
         require_once APP_PATH . '/Models/Category.php';

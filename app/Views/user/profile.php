@@ -69,8 +69,10 @@
                         <div class="card-body">
                             <h3 class="mb-4">Change Password</h3>
 
-                            <form method="POST" action="<?= url('user/update-password') ?>" data-validate>
-                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                            <!-- Password update posts to the same profile endpoint with an action flag -->
+                            <form method="POST" action="<?= url('user/profile') ?>" data-validate>
+                                <input type="hidden" name="action" value="update_password">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? Csrf::token() ?>">
 
                                 <div class="form-group">
                                     <label class="form-label" for="current_password">Current Password</label>
@@ -99,8 +101,10 @@
                             <h3 class="mb-4">Account</h3>
                             <p class="text-muted text-sm mb-4">Member since: <?= !empty($user['created_at']) ? formatDate($user['created_at']) : 'N/A' ?></p>
 
-                            <form method="POST" action="<?= url('user/delete-account') ?>" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                            <!-- Delete account submits to profile with an action flag to allow confirmation flows -->
+                            <form method="POST" action="<?= url('user/profile') ?>" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');" style="display:inline;">
+                                <input type="hidden" name="action" value="delete_account">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? Csrf::token() ?>">
                                 <button type="submit" class="btn btn-danger btn-sm">Delete Account</button>
                             </form>
                         </div>

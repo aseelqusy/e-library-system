@@ -110,6 +110,11 @@ $router->get('api/categories', 'ApiController@categories');
 $router->get('api/featured',   'ApiController@featured');
 $router->get('api/search',     'ApiController@search');
 $router->post('api/review',    'ApiController@addReview');
+// Notifications
+// Endpoint to mark notifications as read (existing)
+$router->post('api/notifications/mark-read', 'ApiController@markNotificationsRead');
+// Lightweight endpoint to clear notifications from the navbar UI
+$router->post('api/notifications/clear', 'ApiController@clearNotifications');
 
 /* Dispatch ----------------------------------------------------- */
 $router->dispatch();

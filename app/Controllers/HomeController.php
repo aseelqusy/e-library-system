@@ -9,6 +9,8 @@ class HomeController extends Controller {
         require_once APP_PATH . '/Models/User.php';
 
         $featuredBooks = array_values(Book::featured());
+        // Ensure each book has normalized cover/pdf keys for the views
+        $featuredBooks = array_map(fn($b) => Book::normalise($b), $featuredBooks);
         $quote = null;
         if (!empty($featuredBooks)) {
             $spotlight = $featuredBooks[0];

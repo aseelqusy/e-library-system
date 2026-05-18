@@ -1,4 +1,4 @@
-<?php View::includeLayout('header', ['title' => $title]); ?>
+<?php View::includeLayout('header', ['title' => $title ?? 'Sign In']); ?>
 
 <div class="page-wrapper">
     <div class="floating-decorations" aria-hidden="true"></div>
@@ -14,7 +14,9 @@
 
                 <form method="POST" action="<?= url('login') ?>" data-validate>
                     <?= Csrf::field() ?>
-
+                    <div style="width:100%; max-width:440px; text-align:center; margin:0;">
+                        <a href="<?= url('') ?>" class="text-sm" style="display:block; margin:0;">← Back to home</a>
+                    </div>
                     <div class="form-group">
                         <label class="form-label" for="email">Email Address</label>
                         <div class="input-group">
@@ -60,7 +62,7 @@
                 </div>
 
                 <div class="auth-footer mt-2 text-xs text-muted">
-                    <strong>Demo:</strong> admin@library.com / admin123 &nbsp;|&nbsp; john@library.com / user123
+
                 </div>
             </div>
         </div>

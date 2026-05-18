@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<?php $initialTheme = (($_COOKIE['theme'] ?? 'dark') === 'light') ? 'light' : 'dark'; ?>
+<html lang="en" data-theme="<?= e($initialTheme) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

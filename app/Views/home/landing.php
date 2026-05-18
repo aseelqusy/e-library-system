@@ -72,10 +72,15 @@
 
             <div class="carousel">
                 <?php foreach ($featured as $book): ?>
+                    <?php $cover = get_book_cover_cached($book['cover_image'] ?? null, $book['isbn'] ?? null); ?>
                     <a href="<?= url('books/' . $book['id']) ?>" class="book-card glass-card"
                        data-book-title="<?= e($book['title']) ?>"
                        data-book-url="<?= url('books/' . $book['id']) ?>">
-                        <div class="book-cover">📖</div>
+                        <?php if (!empty($cover)): ?>
+                            <div class="book-cover"><img src="<?= e($cover) ?>" alt="<?= e($book['title']) ?>" class="book-cover-img"></div>
+                        <?php else: ?>
+                            <div class="book-cover" aria-hidden="true">📖</div>
+                        <?php endif; ?>
                         <div class="book-info">
                             <h4 class="book-title"><?= e($book['title']) ?></h4>
                             <p class="book-author"><?= e($book['author']) ?></p>

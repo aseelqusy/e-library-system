@@ -16,6 +16,22 @@ class UserController extends Controller {
 
     public function updateProfile(): void {
         $this->requireAuth();
+        // Allow this single endpoint to dispatch multiple profile-related POST actions
+        $action = $_POST['action'] ?? 'update_profile';
+
+        if ($action === 'update_password') {
+            // Delegate to the password update flow which performs its own CSRF check
+            $this->updatePassword();
+            return;
+        }
+
+        if ($action === 'delete_account') {
+            // Delegate to the account deletion flow which performs its own CSRF check
+            $this->deleteAccount();
+            return;
+        }
+
+        // Default: update profile details
         if (!$this->validateCsrf()) {
             setFlash('error', 'Invalid request.');
             $this->redirect('user/profile');
