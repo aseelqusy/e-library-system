@@ -164,10 +164,21 @@ View::includeLayout('header', ['title' => $title]);
             <div class="carousel">
                 <?php foreach (($featured ?? []) as $book):
                     $coverRaw = $book['cover_image'] ?? $book['cover'] ?? '';
+                    // Normalize cover URL/path. Support absolute http URLs, stored upload paths, or cached covers.
                     if (strpos($coverRaw, 'http') === 0) {
                         $cover = $coverRaw;
+                    } elseif (!empty($coverRaw) && (strpos($coverRaw, 'uploads/') === 0 || strpos($coverRaw, '/') === 0)) {
+                        // If the stored path already points to uploads or starts with a slash, build a full URL
+                        $cover = url(ltrim($coverRaw, '/'));
                     } else {
+                        // Fallback to cached helper which may return a filename or path
                         $cover = get_book_cover_cached(!empty($coverRaw) ? $coverRaw : null, $book['isbn'] ?? null);
+                        // If helper returned a relative filename, assume it's under uploads/covers
+                        if (!empty($cover) && strpos($cover, 'http') !== 0 && strpos($cover, '/') !== 0) {
+                            $cover = url('uploads/covers/' . ltrim($cover, '/'));
+                        } elseif (!empty($cover) && (strpos($cover, 'uploads/') === 0 || strpos($cover, '/') === 0)) {
+                            $cover = url(ltrim($cover, '/'));
+                        }
                     }
                     ?>
                     <a href="<?= url('books/' . $book['id']) ?>" class="book-card glass-card"
@@ -216,10 +227,12 @@ View::includeLayout('header', ['title' => $title]);
             <?php if (!empty($activities)): ?>
                 <div class="book-grid activity-grid">
                     <?php
+                        // Use actual images from uploads/images as fallbacks for activity cards
                         $exampleActivityImages = [
-                            'data:image/svg+xml;charset=UTF-8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs><rect width="800" height="600" rx="40" fill="url(#g)"/><circle cx="620" cy="120" r="95" fill="#fff" opacity="0.18"/><rect x="120" y="360" width="560" height="130" rx="28" fill="#111827" opacity="0.28"/><text x="70" y="95" fill="#fff" font-size="44" font-family="Arial, Helvetica, sans-serif" font-weight="700">Monthly Reading Circle</text><text x="70" y="170" fill="#eef2ff" font-size="24" font-family="Arial, Helvetica, sans-serif">Join fellow readers for a guided discussion.</text><circle cx="230" cy="260" r="78" fill="#fde68a"/><circle cx="390" cy="260" r="78" fill="#fca5a5"/><circle cx="550" cy="260" r="78" fill="#86efac"/></svg>'),
-                            'data:image/svg+xml;charset=UTF-8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0f766e"/><stop offset="100%" stop-color="#14b8a6"/></linearGradient></defs><rect width="800" height="600" rx="40" fill="url(#g)"/><circle cx="640" cy="140" r="100" fill="#fff" opacity="0.16"/><text x="70" y="95" fill="#fff" font-size="44" font-family="Arial, Helvetica, sans-serif" font-weight="700">Storytelling Workshop</text><text x="70" y="170" fill="#ecfeff" font-size="24" font-family="Arial, Helvetica, sans-serif">Explore creative ways to lead family story sessions.</text><rect x="120" y="250" width="110" height="220" rx="16" fill="#f59e0b"/><rect x="250" y="220" width="110" height="250" rx="16" fill="#60a5fa"/><rect x="380" y="190" width="110" height="280" rx="16" fill="#fb7185"/><rect x="510" y="240" width="110" height="230" rx="16" fill="#facc15"/></svg>'),
-                            'data:image/svg+xml;charset=UTF-8,' . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#312e81"/><stop offset="100%" stop-color="#1e3a8a"/></linearGradient></defs><rect width="800" height="600" rx="40" fill="url(#g)"/><circle cx="630" cy="130" r="90" fill="#fde68a" opacity="0.35"/><text x="70" y="95" fill="#fff" font-size="44" font-family="Arial, Helvetica, sans-serif" font-weight="700">Library Tour Day</text><text x="70" y="170" fill="#e0e7ff" font-size="24" font-family="Arial, Helvetica, sans-serif">Welcome members into study spaces and archives.</text><rect x="80" y="230" width="80" height="250" rx="18" fill="#f8fafc"/><rect x="180" y="230" width="80" height="250" rx="18" fill="#f59e0b"/><rect x="280" y="230" width="80" height="250" rx="18" fill="#60a5fa"/><rect x="380" y="230" width="80" height="250" rx="18" fill="#f472b6"/><rect x="480" y="230" width="80" height="250" rx="18" fill="#34d399"/><rect x="580" y="230" width="80" height="250" rx="18" fill="#facc15"/></svg>'),
+                            url('uploads/images/monthly.png'),
+                            url('uploads/images/story.png'),
+                            url('uploads/images/tour.png'),
+                            url('uploads/images/home.png'),
                         ];
                     ?>
                     <?php foreach ($activities as $index => $activity): ?>
