@@ -1,0 +1,159 @@
+[2026-05-22 02:50:34.000000] Payment processing started | {"user_id":11,"book_id":37,"quantity":1,"payment_method":"card"}
+[2026-05-22 02:50:34.000000] Book retrieved | {"book_id":37,"title":"The Art of Public Speaking (Audio Lecture)","available":9,"price":"9.99"}
+[2026-05-22 02:50:34.000000] Processing payment gateway | {"book_id":37,"quantity":1,"unit_price":9.99,"total":9.99,"payment_method":"card"}
+[2026-05-22 02:50:34.000000] Payment gateway successful | {"transaction_id":"TXN-6a0fa85acbc68"}
+[2026-05-22 02:50:34.000000] Transaction started | []
+[2026-05-22 02:50:34.000000] Creating order record | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99}
+[2026-05-22 02:50:34.000000] Order created successfully | {"order_id":11}
+[2026-05-22 02:50:34.000000] Adjusting book availability | {"book_id":37,"delta":-1}
+[2026-05-22 02:50:34.000000] Book availability adjusted | {"book_id":37}
+[2026-05-22 02:50:34.000000] ERROR: Order creation failed during transaction | Context: {"user_id":11,"book_id":37,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php:186
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php(186): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): PaymentController->process()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('PaymentControll...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 02:50:42.000000] Payment processing started | {"user_id":11,"book_id":37,"quantity":1,"payment_method":"paypal"}
+[2026-05-22 02:50:42.000000] Book retrieved | {"book_id":37,"title":"The Art of Public Speaking (Audio Lecture)","available":8,"price":"9.99"}
+[2026-05-22 02:50:42.000000] Processing payment gateway | {"book_id":37,"quantity":1,"unit_price":9.99,"total":9.99,"payment_method":"paypal"}
+[2026-05-22 02:50:42.000000] Payment gateway successful | {"transaction_id":"PAYPAL-6a0fa8621a038"}
+[2026-05-22 02:50:42.000000] Transaction started | []
+[2026-05-22 02:50:42.000000] Creating order record | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99}
+[2026-05-22 02:50:42.000000] Order created successfully | {"order_id":12}
+[2026-05-22 02:50:42.000000] Adjusting book availability | {"book_id":37,"delta":-1}
+[2026-05-22 02:50:42.000000] Book availability adjusted | {"book_id":37}
+[2026-05-22 02:50:42.000000] ERROR: Order creation failed during transaction | Context: {"user_id":11,"book_id":37,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php:186
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php(186): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): PaymentController->process()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('PaymentControll...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 02:50:43.000000] Payment processing started | {"user_id":11,"book_id":37,"quantity":1,"payment_method":"transfer"}
+[2026-05-22 02:50:43.000000] Book retrieved | {"book_id":37,"title":"The Art of Public Speaking (Audio Lecture)","available":7,"price":"9.99"}
+[2026-05-22 02:50:43.000000] Processing payment gateway | {"book_id":37,"quantity":1,"unit_price":9.99,"total":9.99,"payment_method":"transfer"}
+[2026-05-22 02:50:43.000000] Payment gateway successful | {"transaction_id":"TRANSFER-6a0fa8634aa50"}
+[2026-05-22 02:50:43.000000] Transaction started | []
+[2026-05-22 02:50:43.000000] Creating order record | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99}
+[2026-05-22 02:50:43.000000] Order created successfully | {"order_id":13}
+[2026-05-22 02:50:43.000000] Adjusting book availability | {"book_id":37,"delta":-1}
+[2026-05-22 02:50:43.000000] Book availability adjusted | {"book_id":37}
+[2026-05-22 02:50:43.000000] ERROR: Order creation failed during transaction | Context: {"user_id":11,"book_id":37,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php:186
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php(186): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): PaymentController->process()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('PaymentControll...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 02:57:13.000000] Payment processing started | {"user_id":11,"book_id":37,"quantity":1,"payment_method":"card"}
+[2026-05-22 02:57:13.000000] Book retrieved | {"book_id":37,"title":"The Art of Public Speaking (Audio Lecture)","available":4,"price":"9.99"}
+[2026-05-22 02:57:13.000000] Processing payment gateway | {"book_id":37,"quantity":1,"unit_price":9.99,"total":9.99,"payment_method":"card"}
+[2026-05-22 02:57:13.000000] Payment gateway successful | {"transaction_id":"TXN-6a0fa9e9cf31d"}
+[2026-05-22 02:57:13.000000] Transaction started | []
+[2026-05-22 02:57:13.000000] Creating order record | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99}
+[2026-05-22 02:57:13.000000] Order created successfully | {"order_id":15}
+[2026-05-22 02:57:13.000000] Adjusting book availability | {"book_id":37,"delta":-1}
+[2026-05-22 02:57:13.000000] Book availability adjusted | {"book_id":37}
+[2026-05-22 02:57:13.000000] ERROR: Order creation failed during transaction | Context: {"user_id":11,"book_id":37,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php:186
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php(186): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): PaymentController->process()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('PaymentControll...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 02:57:19.000000] Payment processing started | {"user_id":11,"book_id":37,"quantity":1,"payment_method":"card"}
+[2026-05-22 02:57:19.000000] Book retrieved | {"book_id":37,"title":"The Art of Public Speaking (Audio Lecture)","available":3,"price":"9.99"}
+[2026-05-22 02:57:19.000000] Processing payment gateway | {"book_id":37,"quantity":1,"unit_price":9.99,"total":9.99,"payment_method":"card"}
+[2026-05-22 02:57:19.000000] Payment gateway successful | {"transaction_id":"TXN-6a0fa9efeaad7"}
+[2026-05-22 02:57:19.000000] Transaction started | []
+[2026-05-22 02:57:19.000000] Creating order record | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99}
+[2026-05-22 02:57:19.000000] Order created successfully | {"order_id":16}
+[2026-05-22 02:57:19.000000] Adjusting book availability | {"book_id":37,"delta":-1}
+[2026-05-22 02:57:19.000000] Book availability adjusted | {"book_id":37}
+[2026-05-22 02:57:19.000000] ERROR: Order creation failed during transaction | Context: {"user_id":11,"book_id":37,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php:186
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php(186): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): PaymentController->process()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('PaymentControll...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 02:57:20.000000] Payment processing started | {"user_id":11,"book_id":37,"quantity":1,"payment_method":"card"}
+[2026-05-22 02:57:20.000000] Book retrieved | {"book_id":37,"title":"The Art of Public Speaking (Audio Lecture)","available":2,"price":"9.99"}
+[2026-05-22 02:57:20.000000] Processing payment gateway | {"book_id":37,"quantity":1,"unit_price":9.99,"total":9.99,"payment_method":"card"}
+[2026-05-22 02:57:20.000000] Payment gateway successful | {"transaction_id":"TXN-6a0fa9f0b3cf4"}
+[2026-05-22 02:57:20.000000] Transaction started | []
+[2026-05-22 02:57:20.000000] Creating order record | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99}
+[2026-05-22 02:57:20.000000] Order created successfully | {"order_id":17}
+[2026-05-22 02:57:20.000000] Adjusting book availability | {"book_id":37,"delta":-1}
+[2026-05-22 02:57:20.000000] Book availability adjusted | {"book_id":37}
+[2026-05-22 02:57:20.000000] ERROR: Order creation failed during transaction | Context: {"user_id":11,"book_id":37,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php:186
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php(186): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): PaymentController->process()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('PaymentControll...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 03:06:57.000000] Payment processing started | {"user_id":11,"book_id":20,"quantity":1,"payment_method":"card"}
+[2026-05-22 03:06:57.000000] Book retrieved | {"book_id":20,"title":"Guns, Germs, and Steel","available":0,"price":"0.00"}
+[2026-05-22 03:06:57.000000] Insufficient stock | {"book_id":20,"requested":1,"available":0}
+[2026-05-22 03:07:02.000000] Payment processing started | {"user_id":11,"book_id":20,"quantity":1,"payment_method":"card"}
+[2026-05-22 03:07:02.000000] Book retrieved | {"book_id":20,"title":"Guns, Germs, and Steel","available":0,"price":"0.00"}
+[2026-05-22 03:07:02.000000] Insufficient stock | {"book_id":20,"requested":1,"available":0}
+[2026-05-22 03:08:26.000000] Payment processing started | {"user_id":11,"book_id":20,"quantity":1,"payment_method":"card"}
+[2026-05-22 03:08:26.000000] Book retrieved | {"book_id":20,"title":"Guns, Germs, and Steel","available":67,"price":"0.00"}
+[2026-05-22 03:08:26.000000] Price calculated from formula | {"book_id":20,"unit_price":18.1}
+[2026-05-22 03:08:26.000000] Processing payment gateway | {"book_id":20,"quantity":1,"unit_price":18.1,"total":18.1,"payment_method":"card"}
+[2026-05-22 03:08:26.000000] Payment gateway successful | {"transaction_id":"TXN-6a0fac8ae6a10"}
+[2026-05-22 03:08:26.000000] Transaction started | []
+[2026-05-22 03:08:26.000000] Creating order record | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1}
+[2026-05-22 03:08:26.000000] Order created successfully | {"order_id":21}
+[2026-05-22 03:08:26.000000] Adjusting book availability | {"book_id":20,"delta":-1}
+[2026-05-22 03:08:26.000000] Book availability adjusted | {"book_id":20}
+[2026-05-22 03:08:26.000000] ERROR: Order creation failed during transaction | Context: {"user_id":11,"book_id":20,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php:186
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\PaymentController.php(186): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): PaymentController->process()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('PaymentControll...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 03:14:01.000000] Payment processing started | {"user_id":11,"book_id":20,"quantity":1,"payment_method":"card"}
+[2026-05-22 03:14:01.000000] Book retrieved | {"book_id":20,"title":"Guns, Germs, and Steel","available":1,"price":"0.00"}
+[2026-05-22 03:14:01.000000] Price calculated from formula | {"book_id":20,"unit_price":18.1}
+[2026-05-22 03:14:01.000000] Processing payment gateway | {"book_id":20,"quantity":1,"unit_price":18.1,"total":18.1,"payment_method":"card"}
+[2026-05-22 03:14:01.000000] Payment gateway successful | {"transaction_id":"TXN-6a0fadd97cdcb"}
+[2026-05-22 03:14:01.000000] Orders table verified before transaction | []
+[2026-05-22 03:14:01.000000] Transaction started | []
+[2026-05-22 03:14:01.000000] Creating order record | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1}
+[2026-05-22 03:14:01.000000] Order created successfully | {"order_id":22}
+[2026-05-22 03:14:01.000000] Adjusting book availability | {"book_id":20,"delta":-1}
+[2026-05-22 03:14:01.000000] Book availability adjusted | {"book_id":20}
+[2026-05-22 03:14:01.000000] Transaction committed successfully | {"order_id":22}

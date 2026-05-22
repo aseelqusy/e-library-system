@@ -12,29 +12,31 @@ if ($user) {
     <div class="container">
         <a href="<?= url('') ?>" class="navbar-brand">
             <span class="brand-icon" aria-hidden="true">
-                <img src="<?= url('uploads/images/logo.png') ?>" alt="<?= e(APP_NAME) ?> logo">
+                <img class="brand-logo-dark" src="<?= url('uploads/images/logo.png') ?>" alt="<?= e(APP_NAME) ?> logo">
+                <img class="brand-logo-light" src="<?= url('uploads/images/logo-lightmode.png') ?>" alt="<?= e(APP_NAME) ?> logo light mode">
             </span>
-            <span><?= APP_NAME ?></span>
         </a>
 
         <div class="navbar-nav" role="menubar">
             <a href="<?= url('') ?>" class="nav-link <?= isActive('') ?>" role="menuitem">Home</a>
+            <a href="<?= url('about') ?>" class="nav-link <?= isActive('about') ?>" role="menuitem">About</a>
+            <a href="<?= url('contact') ?>" class="nav-link <?= isActive('contact') ?>" role="menuitem">Contact</a>
             <a href="<?= url('catalog') ?>" class="nav-link <?= isActive('catalog') ?: isActive('catalog/browse') ?>" role="menuitem">Catalog</a>
             <a href="<?= url('catalog/categories') ?>" class="nav-link <?= isActive('catalog/categories') ?>" role="menuitem">Categories</a>
             <?php if ($user): ?>
-                <a href="<?= url('dashboard') ?>" class="nav-link <?= isActive('dashboard') ?>" role="menuitem">Dashboard</a>
+                <?php if (!$isAdmin): ?>
+                    <a href="<?= url('dashboard') ?>" class="nav-link <?= isActive('dashboard') ?>" role="menuitem">Dashboard</a>
+                <?php endif; ?>
 
                 <?php if ($isAdmin): ?>
-                    <a href="<?= url('admin-dashboard') ?>" class="nav-link <?= isActive('admin') ?: isActive('admin/dashboard') ?: isActive('admin-dashboard') ?>" role="menuitem">Admin</a>
+                    <a href="<?= url('admin-dashboard') ?>" class="nav-link admin-dashboard-link <?= isActive('admin') ?: isActive('admin/dashboard') ?: isActive('admin-dashboard') ?>" role="menuitem">Admin Dashboard</a>
                 <?php endif; ?>
             <?php endif; ?>
         </div>
 
         <div class="navbar-actions">
 
-            <button class="navbar-search-btn" onclick="App.CommandPalette.open()" aria-label="Open search">
-                🔍 <span>Search...</span> <kbd>Ctrl+K</kbd>
-            </button>
+            <button class="navbar-search-btn" onclick="App.CommandPalette.open()" aria-label="Open search">🔍</button>
             <button id="theme-toggle" class="btn btn-ghost btn-icon" aria-label="Toggle theme"><span id="theme-icon">☀️</span></button>
 
             <?php if ($user): ?>
@@ -52,16 +54,21 @@ if ($user) {
                             <?php if ($notifCount > 0): ?>
                                 <span class="chip chip-primary"><?= $notifCount ?> new</span>
                             <?php endif; ?>
+                            <button type="button" class="btn btn-ghost btn-sm notification-mark-read">Mark all as read</button>
                         </div>
-                        <?php if (!empty($notifications)):
-                            // Sort by date desc
-                            usort($notifications, fn($a, $b) => strtotime($b['created_at']) <=> strtotime($a['created_at']));
-                            foreach (array_slice($notifications, 0, 5) as $n): ?>
-                                <div class="notification-item <?= $n['is_read'] ? '' : 'unread' ?>">
-                                    <div class="notif-message"><?= e($n['message']) ?></div>
-                                    <div class="notif-time"><?= timeAgo($n['created_at']) ?></div>
-                                </div>
-                            <?php endforeach; endif; ?>
+                        <div class="notification-dropdown-list">
+                            <?php if (!empty($notifications)):
+                                // Sort by date desc
+                                usort($notifications, fn($a, $b) => strtotime($b['created_at']) <=> strtotime($a['created_at']));
+                                foreach (array_slice($notifications, 0, 5) as $n): ?>
+                                    <div class="notification-item <?= $n['is_read'] ? '' : 'unread' ?>">
+                                        <div class="notif-message"><?= e($n['message']) ?></div>
+                                        <div class="notif-time"><?= timeAgo($n['created_at']) ?></div>
+                                    </div>
+                                <?php endforeach; else: ?>
+                                <div class="notification-empty">No notifications yet.</div>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
 

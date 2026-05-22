@@ -115,6 +115,7 @@ class BorrowController extends Controller {
     public function approve(): void {
         // تأكيد الصلاحيات والـ CSRF
         $this->requireAuth();
+        $this->requireAdmin();
         if (!$this->validateCsrf()) {
             $this->json(['success' => false, 'message' => 'Security token invalid.'], 403);
         }
@@ -152,6 +153,7 @@ class BorrowController extends Controller {
 
     public function reject(): void {
         $this->requireAuth();
+        $this->requireAdmin();
         if (!$this->validateCsrf()) {
             $this->json(['success' => false, 'message' => 'Security token invalid.'], 403);
         }
@@ -186,6 +188,7 @@ class BorrowController extends Controller {
 
     public function adminReturn(): void {
         $this->requireAuth();
+        $this->requireAdmin();
         if (!$this->validateCsrf()) {
             $this->json(['success' => false, 'message' => 'Security token invalid.'], 403);
         }

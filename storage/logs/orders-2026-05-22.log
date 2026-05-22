@@ -1,0 +1,244 @@
+[2026-05-22 02:50:30.000000] Order buy request started | {"user_id":11,"book_id":37,"quantity":1}
+[2026-05-22 02:50:30.000000] Book retrieved | {"book_id":37,"title":"The Art of Public Speaking (Audio Lecture)","available":10,"price":"9.99"}
+[2026-05-22 02:50:30.000000] Creating order record | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99}
+[2026-05-22 02:50:30.000000] Transaction started | []
+[2026-05-22 02:50:30.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:50:30.000000] Orders table ensured successfully | []
+[2026-05-22 02:50:30.000000] Order::create() called | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:50:30.000000] Executing order insert statement | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:50:30.000000] Order inserted successfully | {"order_id":10,"user_id":11}
+[2026-05-22 02:50:30.000000] Order created successfully | {"book_id":37,"quantity":1}
+[2026-05-22 02:50:30.000000] Adjusting book availability | {"book_id":37,"delta":-1}
+[2026-05-22 02:50:30.000000] Book availability adjusted | {"book_id":37}
+[2026-05-22 02:50:30.000000] ERROR: Order creation failed | Context: {"user_id":11,"book_id":37,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\OrderController.php:103
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\OrderController.php(103): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): OrderController->buy()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('OrderController...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 02:50:34.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:50:34.000000] Orders table ensured successfully | []
+[2026-05-22 02:50:34.000000] Order::create() called | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:50:34.000000] Executing order insert statement | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:50:34.000000] Order inserted successfully | {"order_id":11,"user_id":11}
+[2026-05-22 02:50:42.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:50:42.000000] Orders table ensured successfully | []
+[2026-05-22 02:50:42.000000] Order::create() called | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:50:42.000000] Executing order insert statement | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:50:42.000000] Order inserted successfully | {"order_id":12,"user_id":11}
+[2026-05-22 02:50:43.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:50:43.000000] Orders table ensured successfully | []
+[2026-05-22 02:50:43.000000] Order::create() called | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:50:43.000000] Executing order insert statement | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:50:43.000000] Order inserted successfully | {"order_id":13,"user_id":11}
+[2026-05-22 02:50:57.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:50:57.000000] Orders table ensured successfully | []
+[2026-05-22 02:56:47.000000] Order buy request started | {"user_id":11,"book_id":22,"quantity":1}
+[2026-05-22 02:56:47.000000] Book retrieved | {"book_id":22,"title":"The Lean Startup","available":0,"price":"0.00"}
+[2026-05-22 02:56:47.000000] Insufficient stock | {"book_id":22,"requested":1,"available":0}
+[2026-05-22 02:56:50.000000] Order buy request started | {"user_id":11,"book_id":22,"quantity":1}
+[2026-05-22 02:56:50.000000] Book retrieved | {"book_id":22,"title":"The Lean Startup","available":0,"price":"0.00"}
+[2026-05-22 02:56:50.000000] Insufficient stock | {"book_id":22,"requested":1,"available":0}
+[2026-05-22 02:57:10.000000] Order buy request started | {"user_id":11,"book_id":37,"quantity":1}
+[2026-05-22 02:57:10.000000] Book retrieved | {"book_id":37,"title":"The Art of Public Speaking (Audio Lecture)","available":5,"price":"9.99"}
+[2026-05-22 02:57:10.000000] Creating order record | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99}
+[2026-05-22 02:57:10.000000] Transaction started | []
+[2026-05-22 02:57:10.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:57:10.000000] Orders table ensured successfully | []
+[2026-05-22 02:57:10.000000] Order::create() called | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:57:10.000000] Executing order insert statement | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:57:10.000000] Order inserted successfully | {"order_id":14,"user_id":11}
+[2026-05-22 02:57:10.000000] Order created successfully | {"book_id":37,"quantity":1}
+[2026-05-22 02:57:10.000000] Adjusting book availability | {"book_id":37,"delta":-1}
+[2026-05-22 02:57:10.000000] Book availability adjusted | {"book_id":37}
+[2026-05-22 02:57:10.000000] ERROR: Order creation failed | Context: {"user_id":11,"book_id":37,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\OrderController.php:103
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\OrderController.php(103): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): OrderController->buy()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('OrderController...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 02:57:13.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:57:13.000000] Orders table ensured successfully | []
+[2026-05-22 02:57:13.000000] Order::create() called | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:57:13.000000] Executing order insert statement | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:57:13.000000] Order inserted successfully | {"order_id":15,"user_id":11}
+[2026-05-22 02:57:19.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:57:19.000000] Orders table ensured successfully | []
+[2026-05-22 02:57:19.000000] Order::create() called | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:57:19.000000] Executing order insert statement | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:57:19.000000] Order inserted successfully | {"order_id":16,"user_id":11}
+[2026-05-22 02:57:20.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:57:20.000000] Orders table ensured successfully | []
+[2026-05-22 02:57:20.000000] Order::create() called | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:57:20.000000] Executing order insert statement | {"user_id":11,"book_id":37,"quantity":1,"unit_price":9.99,"total_price":9.99,"status":"paid"}
+[2026-05-22 02:57:20.000000] Order inserted successfully | {"order_id":17,"user_id":11}
+[2026-05-22 02:59:39.000000] Order buy request started | {"user_id":11,"book_id":42,"quantity":1}
+[2026-05-22 02:59:39.000000] Book retrieved | {"book_id":42,"title":"aseel","available":1,"price":"58.00"}
+[2026-05-22 02:59:39.000000] Creating order record | {"user_id":11,"book_id":42,"quantity":1,"unit_price":58,"total_price":58}
+[2026-05-22 02:59:39.000000] Transaction started | []
+[2026-05-22 02:59:39.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 02:59:39.000000] Orders table ensured successfully | []
+[2026-05-22 02:59:39.000000] Order::create() called | {"user_id":11,"book_id":42,"quantity":1,"unit_price":58,"total_price":58,"status":"paid"}
+[2026-05-22 02:59:39.000000] Executing order insert statement | {"user_id":11,"book_id":42,"quantity":1,"unit_price":58,"total_price":58,"status":"paid"}
+[2026-05-22 02:59:39.000000] Order inserted successfully | {"order_id":18,"user_id":11}
+[2026-05-22 02:59:39.000000] Order created successfully | {"book_id":42,"quantity":1}
+[2026-05-22 02:59:39.000000] Adjusting book availability | {"book_id":42,"delta":-1}
+[2026-05-22 02:59:39.000000] Book availability adjusted | {"book_id":42}
+[2026-05-22 02:59:39.000000] ERROR: Order creation failed | Context: {"user_id":11,"book_id":42,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\OrderController.php:103
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\OrderController.php(103): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): OrderController->buy()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('OrderController...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 02:59:41.000000] Order buy request started | {"user_id":11,"book_id":42,"quantity":1}
+[2026-05-22 02:59:41.000000] Book retrieved | {"book_id":42,"title":"aseel","available":0,"price":"58.00"}
+[2026-05-22 02:59:41.000000] Insufficient stock | {"book_id":42,"requested":1,"available":0}
+[2026-05-22 03:00:14.000000] Order buy request started | {"user_id":11,"book_id":43,"quantity":1}
+[2026-05-22 03:00:14.000000] Book retrieved | {"book_id":43,"title":"rar","available":1,"price":"7.00"}
+[2026-05-22 03:00:14.000000] Creating order record | {"user_id":11,"book_id":43,"quantity":1,"unit_price":7,"total_price":7}
+[2026-05-22 03:00:14.000000] Transaction started | []
+[2026-05-22 03:00:14.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 03:00:14.000000] Orders table ensured successfully | []
+[2026-05-22 03:00:14.000000] Order::create() called | {"user_id":11,"book_id":43,"quantity":1,"unit_price":7,"total_price":7,"status":"paid"}
+[2026-05-22 03:00:14.000000] Executing order insert statement | {"user_id":11,"book_id":43,"quantity":1,"unit_price":7,"total_price":7,"status":"paid"}
+[2026-05-22 03:00:14.000000] Order inserted successfully | {"order_id":19,"user_id":11}
+[2026-05-22 03:00:14.000000] Order created successfully | {"book_id":43,"quantity":1}
+[2026-05-22 03:00:14.000000] Adjusting book availability | {"book_id":43,"delta":-1}
+[2026-05-22 03:00:14.000000] Book availability adjusted | {"book_id":43}
+[2026-05-22 03:00:14.000000] ERROR: Order creation failed | Context: {"user_id":11,"book_id":43,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\OrderController.php:103
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\OrderController.php(103): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): OrderController->buy()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('OrderController...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 03:06:03.000000] Order buy request started | {"user_id":11,"book_id":43,"quantity":1}
+[2026-05-22 03:06:03.000000] Book retrieved | {"book_id":43,"title":"rar","available":0,"price":"7.00"}
+[2026-05-22 03:06:03.000000] Insufficient stock | {"book_id":43,"requested":1,"available":0}
+[2026-05-22 03:06:52.000000] Order buy request started | {"user_id":11,"book_id":20,"quantity":1}
+[2026-05-22 03:06:52.000000] Book retrieved | {"book_id":20,"title":"Guns, Germs, and Steel","available":1,"price":"0.00"}
+[2026-05-22 03:06:52.000000] Price calculated from formula | {"book_id":20,"unit_price":18.1}
+[2026-05-22 03:06:52.000000] Creating order record | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1}
+[2026-05-22 03:06:52.000000] Transaction started | []
+[2026-05-22 03:06:52.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 03:06:52.000000] Orders table ensured successfully | []
+[2026-05-22 03:06:52.000000] Order::create() called | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1,"status":"paid"}
+[2026-05-22 03:06:52.000000] Executing order insert statement | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1,"status":"paid"}
+[2026-05-22 03:06:52.000000] Order inserted successfully | {"order_id":20,"user_id":11}
+[2026-05-22 03:06:52.000000] Order created successfully | {"book_id":20,"quantity":1}
+[2026-05-22 03:06:52.000000] Adjusting book availability | {"book_id":20,"delta":-1}
+[2026-05-22 03:06:52.000000] Book availability adjusted | {"book_id":20}
+[2026-05-22 03:06:52.000000] ERROR: Order creation failed | Context: {"user_id":11,"book_id":20,"quantity":1}
+  Exception: PDOException
+  Message: There is no active transaction
+  Code: 0
+  File: C:\xampp\htdocs\library-app\app\Controllers\OrderController.php:103
+  Trace: #0 C:\xampp\htdocs\library-app\app\Controllers\OrderController.php(103): PDO->commit()
+#1 C:\xampp\htdocs\library-app\core\Router.php(75): OrderController->buy()
+#2 C:\xampp\htdocs\library-app\core\Router.php(33): Router->callHandler('OrderController...', Array)
+#3 C:\xampp\htdocs\library-app\public\index.php(145): Router->dispatch()
+#4 {main}
+
+[2026-05-22 03:08:26.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 03:08:26.000000] Orders table ensured successfully | []
+[2026-05-22 03:08:26.000000] Order::create() called | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1,"status":"paid"}
+[2026-05-22 03:08:26.000000] Executing order insert statement | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1,"status":"paid"}
+[2026-05-22 03:08:26.000000] Order inserted successfully | {"order_id":21,"user_id":11}
+[2026-05-22 03:14:01.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 03:14:01.000000] Orders table ensured successfully | []
+[2026-05-22 03:14:01.000000] Order::create() called | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1,"status":"paid"}
+[2026-05-22 03:14:01.000000] Executing order insert statement | {"user_id":11,"book_id":20,"quantity":1,"unit_price":18.1,"total_price":18.1,"status":"paid"}
+[2026-05-22 03:14:01.000000] Order inserted successfully | {"order_id":22,"user_id":11}
+[2026-05-22 03:14:03.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 03:14:03.000000] Orders table ensured successfully | []
+[2026-05-22 10:13:34.000000] Order buy request started | {"user_id":11,"book_id":52,"quantity":1}
+[2026-05-22 10:13:34.000000] Book retrieved | {"book_id":52,"title":"The Disease and the Cure","available":50,"price":"18.00"}
+[2026-05-22 10:13:34.000000] Creating order record | {"user_id":11,"book_id":52,"quantity":1,"unit_price":18,"total_price":18}
+[2026-05-22 10:13:34.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 10:13:34.000000] Orders table ensured successfully | []
+[2026-05-22 10:13:34.000000] Orders table verified before transaction | []
+[2026-05-22 10:13:34.000000] Transaction started | []
+[2026-05-22 10:13:34.000000] Order::create() called | {"user_id":11,"book_id":52,"quantity":1,"unit_price":18,"total_price":18,"status":"paid"}
+[2026-05-22 10:13:34.000000] Executing order insert statement | {"user_id":11,"book_id":52,"quantity":1,"unit_price":18,"total_price":18,"status":"paid"}
+[2026-05-22 10:13:34.000000] Order inserted successfully | {"order_id":23,"user_id":11}
+[2026-05-22 10:13:34.000000] Order created successfully | {"book_id":52,"quantity":1}
+[2026-05-22 10:13:34.000000] Adjusting book availability | {"book_id":52,"delta":-1}
+[2026-05-22 10:13:34.000000] Book availability adjusted | {"book_id":52}
+[2026-05-22 10:13:34.000000] Transaction committed successfully | {"book_id":52}
+[2026-05-22 10:58:05.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 10:58:05.000000] Orders table ensured successfully | []
+[2026-05-22 10:59:01.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 10:59:01.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:21.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:21.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:29.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:29.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:31.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:31.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:34.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:34.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:45.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:45.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:48.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:48.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:49.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:49.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:52.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:52.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:57.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:57.000000] Orders table ensured successfully | []
+[2026-05-22 11:00:59.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:00:59.000000] Orders table ensured successfully | []
+[2026-05-22 11:01:02.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:01:02.000000] Orders table ensured successfully | []
+[2026-05-22 11:01:19.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:01:19.000000] Orders table ensured successfully | []
+[2026-05-22 11:03:43.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:03:43.000000] Orders table ensured successfully | []
+[2026-05-22 11:03:50.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:03:50.000000] Orders table ensured successfully | []
+[2026-05-22 11:03:51.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:03:51.000000] Orders table ensured successfully | []
+[2026-05-22 11:03:52.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:03:52.000000] Orders table ensured successfully | []
+[2026-05-22 11:04:27.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:04:27.000000] Orders table ensured successfully | []
+[2026-05-22 11:06:22.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:06:22.000000] Orders table ensured successfully | []
+[2026-05-22 11:47:00.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:47:00.000000] Orders table ensured successfully | []
+[2026-05-22 11:50:25.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:50:25.000000] Orders table ensured successfully | []
+[2026-05-22 11:50:39.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:50:39.000000] Orders table ensured successfully | []
+[2026-05-22 11:50:45.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:50:45.000000] Orders table ensured successfully | []
+[2026-05-22 11:50:48.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:50:48.000000] Orders table ensured successfully | []
+[2026-05-22 11:50:52.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:50:52.000000] Orders table ensured successfully | []
+[2026-05-22 11:50:54.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:50:54.000000] Orders table ensured successfully | []
+[2026-05-22 11:54:25.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:54:25.000000] Orders table ensured successfully | []
+[2026-05-22 11:54:27.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 11:54:27.000000] Orders table ensured successfully | []

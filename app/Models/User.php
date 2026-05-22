@@ -82,6 +82,38 @@ class User {
         return $stmt->execute([$hashedPassword, $id]);
     }
 
+    public static function storeResetToken(int $id, string $tokenHash, string $expiresAt): bool {
+        $stmt = self::db()->prepare(
+            "UPDATE users SET reset_token_hash = ?, reset_token_expires = ? WHERE id = ?"
+        );
+        return $stmt->execute([$tokenHash, $expiresAt, $id]);
+    }
+
+    public static function findByResetTokenHash(string $tokenHash): ?array {
+        $stmt = self::db()->prepare(
+            "SELECT * FROM users WHERE reset_token_hash = ? AND reset_token_expires > NOW() LIMIT 1"
+        );
+        $stmt->execute([$tokenHash]);
+        $user = $stmt->fetch();
+        return $user ?: null;
+    }
+
+    public static function updatePasswordAndClearResetToken(int $id, string $hashedPassword, string $tokenHash): bool {
+        $stmt = self::db()->prepare(
+            "UPDATE users
+             SET password = ?, reset_token_hash = NULL, reset_token_expires = NULL
+             WHERE id = ? AND reset_token_hash = ? AND reset_token_expires > NOW()"
+        );
+        return $stmt->execute([$hashedPassword, $id, $tokenHash]);
+    }
+
+    public static function clearResetToken(int $id): bool {
+        $stmt = self::db()->prepare(
+            "UPDATE users SET reset_token_hash = NULL, reset_token_expires = NULL WHERE id = ?"
+        );
+        return $stmt->execute([$id]);
+    }
+
     public static function updateRole(int $id, string $role): bool {
         $stmt = self::db()->prepare("UPDATE users SET role = ? WHERE id = ?");
         return $stmt->execute([$role, $id]);

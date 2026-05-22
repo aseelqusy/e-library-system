@@ -1,0 +1,14 @@
+========================================
+Email: amany@gmail.com
+Name: amany
+Generated At: 2026-05-22 03:55:00
+Expires At: 2026-05-22 04:25:00
+Reset Link: http://localhost/library-app/public/reset-password?token=a7addc0ee8294a03ce84434df00a987b9d21c41ac084930e2391406d7fdf297c
+
+========================================
+Email: amany@gmail.com
+Name: amany
+Generated At: 2026-05-22 03:57:09
+Expires At: 2026-05-22 04:27:09
+Reset Link: http://localhost/library-app/public/reset-password?token=92f10e7371045a02a8befea8a1a0e817341b209f49f6f3d788dae2b635df4b28
+

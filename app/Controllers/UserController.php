@@ -11,6 +11,7 @@ class UserController extends Controller {
             'title'   => 'My Profile',
             'user'    => $user,
             'layout'  => 'public',
+            'current_page' => 'profile',
         ]);
     }
 
@@ -42,7 +43,19 @@ class UserController extends Controller {
         $phone = trim($_POST['phone'] ?? '');
         $bio   = trim($_POST['bio'] ?? '');
 
-        Auth::updateUser(Auth::id(), [
+        if ($name === '' || $email === '') {
+            setFlash('error', 'Name and email are required.');
+            $this->redirect('user/profile');
+        }
+
+        require_once APP_PATH . '/Models/User.php';
+
+        if (User::findByEmail($email) && strtolower($email) !== strtolower(Auth::user()['email'] ?? '')) {
+            setFlash('error', 'Email already in use by another account.');
+            $this->redirect('user/profile');
+        }
+
+        User::updateProfile(Auth::id(), [
             'name' => $name, 'email' => $email,
             'phone' => $phone, 'bio' => $bio,
         ]);
@@ -67,6 +80,7 @@ class UserController extends Controller {
             'title'   => 'My Borrows',
             'borrows' => $enriched,
             'layout'  => 'public',
+            'current_page' => 'borrows',
         ]);
     }
 
@@ -80,6 +94,7 @@ class UserController extends Controller {
             'title'  => 'My Wishlist',
             'books'  => $books,
             'layout' => 'public',
+            'current_page' => 'wishlist',
         ]);
     }
 
@@ -123,52 +138,165 @@ class UserController extends Controller {
             'title'   => 'Borrow History',
             'borrows' => $enriched,
             'layout'  => 'public',
+            'current_page' => 'history',
         ]);
     }
 
     public function dashboard(): void {
         $this->requireAuth();
+        require_once APP_PATH . '/Models/User.php';
+        require_once APP_PATH . '/Models/Borrow.php';
+        require_once APP_PATH . '/Models/Order.php';
+        require_once APP_PATH . '/Models/Wishlist.php';
+
+        $user = User::find((int)Auth::id());
+        $userId = (int)Auth::id();
+        $createdAt = $user['created_at'] ?? null;
+        $isNewUser = false;
+        if ($createdAt) {
+            $isNewUser = (time() - strtotime((string)$createdAt)) < (7 * 24 * 60 * 60);
+        }
+
+        $borrows = Borrow::forUser($userId);
+        $orders = Order::forUser($userId);
+        $wishlistItems = Wishlist::booksForUser($userId);
+
+        $activeLoans = 0;
+        foreach ($borrows as $borrow) {
+            if (($borrow['status'] ?? '') === 'active') {
+                $activeLoans++;
+            }
+        }
 
         $this->view('user/dashboard', [
-            'title'  => 'My Dashboard',
+            'title' => 'My Dashboard',
             'layout' => 'public',
+            'isNewUser' => $isNewUser,
+            'user_avatar' => $user['avatar'] ?? null,
+            'member_since' => $createdAt,
+            'total_borrowed' => count($borrows),
+            'active_loans' => $activeLoans,
+            'wishlist_count' => count($wishlistItems),
+            'pending_orders' => $this->countPendingOrders($orders),
+            'recent_activity' => $this->buildRecentActivity($borrows, $orders),
+            'current_page' => 'dashboard',
+        ]);
+    }
+
+    private function countPendingOrders(array $orders): int {
+        $pending = 0;
+        foreach ($orders as $order) {
+            if (($order['status'] ?? '') === 'pending') {
+                $pending++;
+            }
+        }
+        return $pending;
+    }
+
+    private function buildRecentActivity(array $borrows, array $orders, int $limit = 5): array {
+        $activities = [];
+
+        foreach ($borrows as $borrow) {
+            $createdAt = $borrow['created_at'] ?? $borrow['borrow_date'] ?? null;
+            if (!$createdAt) {
+                continue;
+            }
+
+            $status = (string)($borrow['status'] ?? 'active');
+            if ($status === 'returned') {
+                $label = 'Returned';
+            } elseif ($status === 'overdue') {
+                $label = 'Borrow overdue';
+            } else {
+                $label = 'Borrowed';
+            }
+
+            $activities[] = [
+                'type' => 'borrow',
+                'icon' => 'book-open',
+                'action' => $label,
+                'time' => timeAgo((string)$createdAt),
+                'sort_at' => strtotime((string)$createdAt) ?: 0,
+            ];
+        }
+
+        foreach ($orders as $order) {
+            $createdAt = $order['created_at'] ?? null;
+            if (!$createdAt) {
+                continue;
+            }
+
+            $activities[] = [
+                'type' => 'order',
+                'icon' => 'box',
+                'action' => 'Order ' . ucfirst((string)($order['status'] ?? 'pending')),
+                'time' => timeAgo((string)$createdAt),
+                'sort_at' => strtotime((string)$createdAt) ?: 0,
+            ];
+        }
+
+        usort($activities, static fn(array $a, array $b): int => $b['sort_at'] <=> $a['sort_at']);
+
+        return array_map(static function (array $activity): array {
+            unset($activity['sort_at']);
+            return $activity;
+        }, array_slice($activities, 0, $limit));
+    }
+
+    public function orders(): void {
+        $this->requireAuth();
+        require_once APP_PATH . '/Models/Order.php';
+
+        $orders = Order::forUser((int)Auth::id());
+
+        $this->view('user/my-orders', [
+            'title' => 'My Orders',
+            'orders' => $orders,
+            'layout' => 'public',
+            'current_page' => 'orders',
         ]);
     }
 
     public function updatePassword(): void {
-        // فرض تسجيل الدخول أولاً قبل أي إجراء
         $this->requireAuth();
 
-        // التحقق من توكن الحماية باستخدام الدالة المدمجة بمشروعك
         if (!$this->validateCsrf()) {
             setFlash('error', 'Invalid security token request.');
             $this->redirect('user/profile');
-            return;
         }
 
-        // استقبال البيانات القادمة من الـ Form
         $currentPassword = $_POST['current_password'] ?? '';
         $newPassword     = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
 
-        // جلب بيانات المستخدم الحالي عبر الموديل والمُعرّف المخزن في الجلسة Auth::id()
+        $validator = new Validator($_POST);
+        $validator->required('current_password', 'Current password')
+                  ->required('new_password', 'New password')
+                  ->minLength('new_password', 6, 'New password')
+                  ->matches('new_password', 'confirm_password', 'New password');
+
+        if (!$validator->passes()) {
+            setFlash('error', $validator->firstError());
+            $this->redirect('user/profile');
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            setFlash('error', 'New password fields do not match.');
+            $this->redirect('user/profile');
+        }
+
         require_once APP_PATH . '/Models/User.php';
         $userId = Auth::id();
         $user = User::find($userId);
 
-        // التحقق من صحة كلمة المرور الحالية المخزنة في الـ DB (bcrypt)
         if (!$user || !password_verify($currentPassword, $user['password'])) {
             setFlash('error', 'Current password is incorrect.');
             $this->redirect('user/profile');
-            return;
         }
 
-        // تشفير كلمة المرور الجديدة وتحديثها في قاعدة البيانات
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
 
-        // استخدام دالة التحديث المدعومة في نظام الـ Auth الخاص بمشروعك
-        $updated = Auth::updateUser($userId, [
-            'password' => $hashedPassword
-        ]);
+        $updated = User::updatePassword($userId, $hashedPassword);
 
         if ($updated) {
             setFlash('success', 'Password updated successfully!');
@@ -185,30 +313,35 @@ class UserController extends Controller {
         if (!$this->validateCsrf()) {
             setFlash('error', 'Invalid security token request.');
             $this->redirect('user/profile');
-            return;
         }
 
         require_once APP_PATH . '/Models/User.php';
         $userId = Auth::id();
 
-        // تحديث حالة الحساب إلى غير نشط (is_active = 0) بناءً على الـ Schema الخاصة بك
-        $deleted = Auth::updateUser($userId, [
-            'is_active' => 0
-        ]);
-
-        if ($deleted) {
-            // تسجيل الخروج التلقائي بعد تعطيل الحساب
+        if (User::deleteWithRelations($userId)) {
             Auth::logout();
-
-            // بدء جلسة جديدة لإظهار توبست النجاح على الصفحة الرئيسية
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
             setFlash('success', 'Your account has been deleted successfully.');
             $this->redirect('home');
-        } else {
-            setFlash('error', 'Failed to delete account.');
+        }
+
+        setFlash('error', 'Failed to delete account.');
+        $this->redirect('user/profile');
+    }
+
+    public function logoutAllSessions(): void {
+        $this->requireAuth();
+
+        if (!$this->validateCsrf()) {
+            setFlash('error', 'Invalid security token request.');
             $this->redirect('user/profile');
         }
+
+        if (Auth::logoutAllSessions()) {
+            setFlash('success', 'You have been logged out from all sessions.');
+            $this->redirect('login');
+        }
+
+        setFlash('error', 'Unable to sign out from all sessions.');
+        $this->redirect('user/profile');
     }
 }

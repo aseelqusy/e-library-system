@@ -1,7 +1,11 @@
 <?php View::includeLayout('header', ['title' => $title]); ?>
 <?php View::includeLayout('navbar'); ?>
 
+<div class="page-background"></div>
 <div class="page-wrapper" style="padding-top: var(--navbar-height);">
+    <!-- Floating decorations -->
+    <div class="floating-decorations" aria-hidden="true"></div>
+
     <section class="section">
         <div class="container">
             <div class="section-header">

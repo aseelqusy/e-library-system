@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Library Tour</title>
+  <desc id="desc">Illustration of a welcoming library aisle with books and light.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#312e81"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <linearGradient id="light" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde68a" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" rx="40" fill="url(#sky)"/>
+  <path d="M0 420h800v180H0z" fill="#111827" opacity="0.24"/>
+  <g transform="translate(90 160)">
+    <rect x="0" y="0" width="620" height="280" rx="28" fill="#0f172a" opacity="0.25"/>
+    <rect x="40" y="40" width="80" height="200" rx="18" fill="#f8fafc" opacity="0.95"/>
+    <rect x="140" y="40" width="80" height="200" rx="18" fill="#f59e0b"/>
+    <rect x="240" y="40" width="80" height="200" rx="18" fill="#60a5fa"/>
+    <rect x="340" y="40" width="80" height="200" rx="18" fill="#f472b6"/>
+    <rect x="440" y="40" width="80" height="200" rx="18" fill="#34d399"/>
+    <rect x="540" y="40" width="80" height="200" rx="18" fill="#facc15"/>
+    <rect x="-10" y="255" width="660" height="18" rx="9" fill="#f8fafc" opacity="0.9"/>
+  </g>
+  <circle cx="650" cy="120" r="85" fill="url(#light)"/>
+  <text x="60" y="90" fill="#fff" font-size="42" font-family="Arial, Helvetica, sans-serif" font-weight="700">Library Tour Day</text>
+</svg>
+

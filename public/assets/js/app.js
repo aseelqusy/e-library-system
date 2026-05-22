@@ -57,22 +57,43 @@ const App = (() => {
         highlighted: -1,
 
         init() {
+            const role = document.body.dataset.userRole || 'guest';
+            const authenticated = document.body.dataset.authenticated === '1';
+            const isAdmin = role === 'admin';
+
             this.items = [
-                { label: 'Home',                icon: '🏠', url: BASE + '/' },
-                { label: 'Browse Catalog',      icon: '📚', url: BASE + '/catalog' },
-                { label: 'Categories',           icon: '🏷️', url: BASE + '/catalog/categories' },
-                { label: 'Search Books',         icon: '🔍', url: BASE + '/catalog/search' },
-                { label: 'Login',               icon: '🔑', url: BASE + '/login' },
-                { label: 'Register',            icon: '📝', url: BASE + '/register' },
-                { label: 'My Profile',          icon: '👤', url: BASE + '/user/profile' },
-                { label: 'My Borrows',          icon: '📖', url: BASE + '/user/borrows' },
-                { label: 'Wishlist',            icon: '❤️', url: BASE + '/user/wishlist' },
-                { label: 'Borrow History',      icon: '📜', url: BASE + '/user/history' },
-                { label: 'Admin Dashboard',     icon: '📊', url: BASE + '/admin' },
-                { label: 'Manage Books',        icon: '📕', url: BASE + '/admin/books' },
-                { label: 'Manage Users',        icon: '👥', url: BASE + '/admin/users' },
-                { label: 'Settings',            icon: '⚙️', url: BASE + '/admin/settings' },
+                { label: 'Home',           icon: '🏠', url: BASE + '/' },
+                { label: 'About Us',       icon: 'ℹ️', url: BASE + '/about' },
+                { label: 'Contact Us',     icon: '✉️', url: BASE + '/contact' },
+                { label: 'Browse Catalog', icon: '📚', url: BASE + '/catalog' },
+                { label: 'Categories',     icon: '🏷️', url: BASE + '/catalog/categories' },
+                { label: 'Search Books',   icon: '🔍', url: BASE + '/catalog/search' },
             ];
+
+            if (authenticated) {
+                this.items.push(
+                    { label: 'My Profile',     icon: '👤', url: BASE + '/user/profile' },
+                    { label: 'My Borrows',     icon: '📖', url: BASE + '/user/borrows' },
+                    { label: 'My Orders',      icon: '🧾', url: BASE + '/user/orders' },
+                    { label: 'Wishlist',       icon: '❤️', url: BASE + '/user/wishlist' },
+                    { label: 'Borrow History', icon: '📜', url: BASE + '/user/history' }
+                );
+            } else {
+                this.items.push(
+                    { label: 'Login',    icon: '🔑', url: BASE + '/login' },
+                    { label: 'Register', icon: '📝', url: BASE + '/register' }
+                );
+            }
+
+            if (isAdmin) {
+                this.items.push(
+                    { label: 'Admin Dashboard', icon: '📊', url: BASE + '/admin' },
+                    { label: 'Manage Books',    icon: '📕', url: BASE + '/admin/books' },
+                    { label: 'Manage Users',    icon: '👥', url: BASE + '/admin/users' },
+                    { label: 'Manage Reviews',  icon: '💬', url: BASE + '/admin/reviews' },
+                    { label: 'Settings',        icon: '⚙️', url: BASE + '/admin/settings' }
+                );
+            }
 
             // Add book items from page data if available
             const bookData = document.querySelectorAll('[data-book-title]');
@@ -167,7 +188,7 @@ const App = (() => {
                 return;
             }
 
-            this.results.innerHTML = filtered.map((item, i) => `
+            this.results.innerHTML = filtered.map(item => `
                 <div class="command-palette-item" data-url="${this._escapeAttr(item.url)}" role="option" tabindex="-1">
                     <span class="cp-icon">${item.icon}</span>
                     <span class="cp-label">${this._escapeHtml(item.label)}</span>
@@ -222,16 +243,36 @@ const App = (() => {
         },
 
         init() {
+            document.addEventListener('keydown', e => {
+                if (e.key !== 'Escape') return;
+                const openOverlay = document.querySelector('.modal-overlay.show');
+                if (!openOverlay) return;
+                if (openOverlay.id) {
+                    this.close(openOverlay.id);
+                } else {
+                    openOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            });
+
             document.addEventListener('click', e => {
                 if (e.target.classList.contains('modal-overlay')) {
-                    e.target.classList.remove('show');
-                    document.body.style.overflow = '';
+                    if (e.target.id) {
+                        this.close(e.target.id);
+                    } else {
+                        e.target.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
                 }
                 if (e.target.closest('.modal-close')) {
                     const overlay = e.target.closest('.modal-overlay');
                     if (overlay) {
-                        overlay.classList.remove('show');
-                        document.body.style.overflow = '';
+                        if (overlay.id) {
+                            this.close(overlay.id);
+                        } else {
+                            overlay.classList.remove('show');
+                            document.body.style.overflow = '';
+                        }
                     }
                 }
                 if (e.target.dataset.modal) {
@@ -264,49 +305,82 @@ const App = (() => {
 
     /* ── Notification Dropdown ──────────────────── */
     const Notifications = {
+        pollTimer: null,
+
+        async refresh() {
+            const btn = document.querySelector('.notification-btn');
+            const dropdown = document.querySelector('.notification-dropdown');
+            const badge = document.querySelector('.notification-badge');
+            const list = document.querySelector('.notification-dropdown-list');
+            if (!btn || !dropdown || !list) return;
+
+            try {
+                const response = await fetch(BASE + '/api/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await response.json();
+                if (!data || !data.success) return;
+
+                const unread = Number(data.unreadCount || 0);
+                if (badge) {
+                    if (unread > 0) {
+                        badge.style.display = '';
+                        badge.textContent = String(unread);
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+
+                if (Array.isArray(data.notifications)) {
+                    if (!data.notifications.length) {
+                        list.innerHTML = '<div class="notification-empty">No notifications yet.</div>';
+                    } else {
+                        list.innerHTML = data.notifications.map(n => `
+                            <div class="notification-item ${n.is_read ? '' : 'unread'}">
+                                <div class="notif-message">${this._escapeHtml(n.message || '')}</div>
+                                <div class="notif-time">${this._formatDate(n.created_at)}</div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to refresh notifications', error);
+            }
+        },
+
         init() {
             const btn = document.querySelector('.notification-btn');
             const dropdown = document.querySelector('.notification-dropdown');
             const badge = document.querySelector('.notification-badge');
+            const markReadBtn = document.querySelector('.notification-mark-read');
             if (!btn || !dropdown) return;
 
             btn.addEventListener('click', e => {
                 e.stopPropagation();
                 dropdown.classList.toggle('show');
 
-                // Immediately hide the red unread badge for a snappy UI, then
-                // perform an async request to mark notifications as read on the server.
-                try {
-                    const hasBadge = badge && badge.textContent && badge.textContent.trim() !== '';
-                    if (hasBadge && badge.style.display !== 'none') {
-                        // Hide immediately so user sees the badge cleared without waiting.
-                        badge.style.display = 'none';
+                if (dropdown.classList.contains('show')) {
+                    this.refresh();
+                }
+            });
 
-                        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
-                        fetch(BASE + '/api/notifications/clear', {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: new URLSearchParams({ csrf_token: csrf })
-                        }).then(r => r.json()).then(data => {
-                            if (data && data.success) {
-                                // Clear unread styling on items
-                                document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
-                                // Ensure badge shows zero (in case other code reads it)
-                                if (badge) badge.textContent = '0';
-                            } else {
-                                // If server failed, show badge again
-                                if (badge) badge.style.display = '';
-                            }
-                        }).catch(err => {
-                            console.error('Failed to clear notifications', err);
-                            if (badge) badge.style.display = ''; // restore
-                        });
+            markReadBtn?.addEventListener('click', async e => {
+                e.stopPropagation();
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                try {
+                    const response = await fetch(BASE + '/api/notifications/clear', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({ _token: csrf }).toString()
+                    });
+                    const data = await response.json();
+                    if (data && data.success) {
+                        document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
+                        if (badge) badge.style.display = 'none';
                     }
                 } catch (err) {
-                    console.error('Notification handler error', err);
+                    console.error('Failed to clear notifications', err);
                 }
             });
 
@@ -315,6 +389,23 @@ const App = (() => {
                     dropdown.classList.remove('show');
                 }
             });
+
+            this.refresh();
+            if (this.pollTimer) clearInterval(this.pollTimer);
+            this.pollTimer = setInterval(() => this.refresh(), 30000);
+        },
+
+        _formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleString(undefined, { month: 'short', day: '2-digit', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+        },
+
+        _escapeHtml(value) {
+            const div = document.createElement('div');
+            div.textContent = value ?? '';
+            return div.innerHTML;
         }
     };
 
@@ -362,10 +453,42 @@ const App = (() => {
         init() {
             const searchInput = document.getElementById('catalog-search');
             const grid = document.getElementById('book-grid');
-            if (!searchInput || !grid) return;
+            const suggestions = document.getElementById('catalog-search-suggestions');
+            if (!searchInput) return;
 
-            searchInput.addEventListener('input', () => {
-                const q = searchInput.value.toLowerCase();
+            let debounceTimer = null;
+            let requestId = 0;
+
+            const renderSuggestions = (items, query) => {
+                if (!suggestions) return;
+                if (!query || query.length < 2) {
+                    suggestions.classList.remove('show');
+                    suggestions.innerHTML = '';
+                    return;
+                }
+
+                if (!items.length) {
+                    suggestions.innerHTML = '<div class="notification-empty">No matches found.</div>';
+                    suggestions.classList.add('show');
+                    return;
+                }
+
+                suggestions.innerHTML = items.slice(0, 6).map(item => `
+                    <button type="button" class="search-suggestion-item" data-url="${item.id ? BASE + '/books/' + item.id : '#'}">
+                        <span class="book-cover-placeholder">📖</span>
+                        <span class="search-suggestion-meta">
+                            <span class="search-suggestion-title">${item.title || ''}</span>
+                            <span class="search-suggestion-author">${item.author || ''}</span>
+                            <span class="search-suggestion-hint">${item.rating ? `★ ${Number(item.rating).toFixed(1)}` : 'Open book details'}</span>
+                        </span>
+                    </button>
+                `).join('');
+                suggestions.classList.add('show');
+            };
+
+            const filterCards = (query) => {
+                if (!grid) return;
+                const q = (query || '').toLowerCase();
                 const cards = grid.querySelectorAll('.book-card');
                 let visible = 0;
 
@@ -379,6 +502,53 @@ const App = (() => {
 
                 const emptyMsg = grid.querySelector('.empty-state');
                 if (emptyMsg) emptyMsg.style.display = visible ? 'none' : 'block';
+            };
+
+            const fetchSuggestions = async (query) => {
+                const currentId = ++requestId;
+                if (!suggestions) return;
+
+                if (!query || query.length < 2) {
+                    suggestions.classList.remove('show');
+                    suggestions.innerHTML = '';
+                    return;
+                }
+
+                suggestions.innerHTML = '<div class="notification-empty">Searching...</div>';
+                suggestions.classList.add('show');
+
+                try {
+                    const response = await fetch(BASE + '/api/search?q=' + encodeURIComponent(query), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    if (currentId !== requestId) return;
+                    renderSuggestions(data.data || [], query);
+                } catch (error) {
+                    if (currentId !== requestId) return;
+                    suggestions.innerHTML = '<div class="notification-empty">Search unavailable.</div>';
+                    suggestions.classList.add('show');
+                }
+            };
+
+            searchInput.addEventListener('input', () => {
+                const q = searchInput.value.trim();
+                filterCards(q);
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => fetchSuggestions(q), 250);
+            });
+
+            suggestions?.addEventListener('click', event => {
+                const item = event.target.closest('.search-suggestion-item');
+                if (!item) return;
+                const url = item.dataset.url;
+                if (url) window.location.href = url;
+            });
+
+            document.addEventListener('click', event => {
+                if (suggestions && !suggestions.contains(event.target) && event.target !== searchInput) {
+                    suggestions.classList.remove('show');
+                }
             });
         }
     };
@@ -484,6 +654,42 @@ const App = (() => {
         }
     };
 
+    const QuoteRotator = {
+        init() {
+            const root = document.querySelector('[data-quote-rotator]');
+            if (!root) return;
+            const items = Array.from(root.querySelectorAll('.quote-item'));
+            if (items.length <= 1) return;
+
+            let current = 0;
+            setInterval(() => {
+                items[current].classList.remove('active');
+                current = (current + 1) % items.length;
+                items[current].classList.add('active');
+            }, 5000);
+        }
+    };
+
+    const ServiceCardsReveal = {
+        init() {
+            const cards = document.querySelectorAll('[data-service-reveal]');
+            if (!cards.length) return;
+
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('in-view');
+                    observer.unobserve(entry.target);
+                });
+            }, { threshold: 0.2, rootMargin: '0px 0px -10% 0px' });
+
+            cards.forEach((card, index) => {
+                card.style.transitionDelay = `${Math.min(index, 5) * 60}ms`;
+                observer.observe(card);
+            });
+        }
+    };
+
     /* ── Admin Sidebar Toggle ──────────────────── */
     const AdminSidebar = {
         init() {
@@ -519,6 +725,8 @@ const App = (() => {
         BorrowActions.init();
         AnimateCounters.init();
         AdminSidebar.init();
+        QuoteRotator.init();
+        ServiceCardsReveal.init();
 
         // Show flash messages after Toast is ready
         setTimeout(() => FlashMessages.init(), 100);

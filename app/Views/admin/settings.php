@@ -1,6 +1,7 @@
 <?php View::includeLayout('header', ['title' => $title]); ?>
 <?php View::includeLayout('navbar'); ?>
 
+<div class="page-background"></div>
 <div class="admin-layout">
     <?php View::partial('admin/sidebar'); ?>
 
@@ -15,7 +16,7 @@
             <div class="card glass-card" style="padding:24px;">
                 <h3 class="mb-4">General</h3>
                 <form id="general-settings">
-                    <input type="hidden" name="csrf_token" value="<?= Csrf::token() ?>">
+                    <?= Csrf::field() ?>
                     <div class="form-group">
                         <label class="form-label">Application Name</label>
                         <input type="text" class="form-control" value="<?= e($settings['app_name'] ?? 'Luminara Library') ?>" name="app_name">

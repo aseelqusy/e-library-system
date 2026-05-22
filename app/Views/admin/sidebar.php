@@ -20,6 +20,9 @@
         <a href="<?= url('admin/categories') ?>" class="sidebar-link <?= isActive('admin/categories') ?>">
             <span class="link-icon">🏷️</span> Categories
         </a>
+        <a href="<?= url('admin/reviews') ?>" class="sidebar-link <?= isActive('admin/reviews') ?>">
+            <span class="link-icon">💬</span> Reviews
+        </a>
     </div>
     <div class="sidebar-section">
         <div class="sidebar-label">Analytics</div>

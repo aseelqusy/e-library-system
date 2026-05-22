@@ -1,7 +1,10 @@
 <?php View::includeLayout('header', ['title' => $title]); ?>
 <?php View::includeLayout('navbar'); ?>
 
+<div class="page-background"></div>
 <div class="page-wrapper" style="padding-top: var(--navbar-height);">
+    <!-- Floating decorations -->
+    <div class="floating-decorations" aria-hidden="true"></div>
     <section class="section">
         <div class="container">
             <div class="section-header">
@@ -9,10 +12,13 @@
             </div>
 
             <form action="<?= url('catalog/search') ?>" method="GET" class="mb-6">
-                <div class="input-group" style="max-width:500px;">
-                    <span class="input-icon">🔍</span>
-                    <input type="text" name="q" class="form-control" placeholder="Search books..."
-                           value="<?= e($query) ?>" autofocus aria-label="Search books">
+                <div class="search-input-wrap" style="max-width:500px;">
+                    <div class="input-group">
+                        <span class="input-icon">🔍</span>
+                        <input type="text" id="catalog-search" name="q" class="form-control" placeholder="Search books..."
+                               value="<?= e($query) ?>" autofocus aria-label="Search books">
+                    </div>
+                    <div id="catalog-search-suggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
                 </div>
             </form>
 
@@ -27,22 +33,33 @@
                     </div>
                 <?php else: ?>
                     <div class="book-grid">
-                        <?php foreach ($books as $book): ?>
-                            <?php $coverPath = !empty($book['cover_image']) ? url(ltrim($book['cover_image'], '/')) : null; ?>
-                            <a href="<?= url('books/' . $book['id']) ?>" class="book-card glass-card">
-                                <div class="book-cover">
-                                    <?php if ($coverPath): ?>
-                                        <img src="<?= $coverPath ?>" alt="<?= e($book['title']) ?> cover" loading="lazy">
-                                    <?php else: ?>
-                                        📖
-                                    <?php endif; ?>
-                                </div>
+                         <?php foreach ($books as $book): ?>
+                             <?php
+                                 $coverPath = getBookCover($book);
+                             ?>
+                             <a href="<?= url('books/' . $book['id']) ?>" class="book-card glass-card">
+                                 <div class="book-cover">
+                                     <?php if ($coverPath): ?>
+                                         <img src="<?= e($coverPath) ?>"
+                                              alt="<?= e($book['title']) ?> cover"
+                                              loading="lazy"
+                                              data-book-id="<?= $book['id'] ?>"
+                                              data-isbn="<?= e($book['isbn'] ?? '') ?>"
+                                              onerror="this.style.display='none'; this.parentElement.innerHTML='📖';">
+                                     <?php else: ?>
+                                         📖
+                                     <?php endif; ?>
+                                 </div>
                                 <div class="book-info">
                                     <h4 class="book-title"><?= e($book['title']) ?></h4>
                                     <p class="book-author"><?= e($book['author']) ?></p>
                                     <div class="book-meta">
                                         <span class="book-rating">★ <?= $book['rating'] ?></span>
                                     </div>
+                                </div>
+                                <div class="card-overlay">
+                                    <span class="btn btn-primary btn-sm">View Details</span>
+                                    <span class="btn btn-outline btn-sm">Buy Now</span>
                                 </div>
                             </a>
                         <?php endforeach; ?>

@@ -1,6 +1,7 @@
 <?php View::includeLayout('header', ['title' => $title]); ?>
 <?php View::includeLayout('navbar'); ?>
 
+    <div class="page-background"></div>
     <div class="admin-layout">
         <?php View::partial('admin/sidebar'); ?>
 
@@ -84,6 +85,10 @@
                                                 data-year="<?= $book['year'] ?>"
                                                 data-pages="<?= $book['pages'] ?>"
                                                 data-copies="<?= $book['copies'] ?>"
+                                                data-price="<?= $book['price'] ?? 0 ?>"
+                                                data-format="<?= $book['format'] ?? 'written' ?>"
+                                                data-for_sale="<?= (int)($book['for_sale'] ?? 1) ?>"
+                                                data-for_borrow="<?= (int)($book['for_borrow'] ?? 1) ?>"
                                                 data-publisher="<?= e($book['publisher'] ?? '') ?>"
                                                 data-description="<?= e($book['description'] ?? '') ?>"
                                                 data-cover="<?= e($coverPath) ?>"
@@ -146,6 +151,30 @@
                         <div class="form-group">
                             <label class="form-label">Copies</label>
                             <input type="number" name="copies" class="form-control" placeholder="5" min="0" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price ($)</label>
+                            <input type="number" name="price" class="form-control" placeholder="9.99" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Format</label>
+                            <select name="format" class="form-control">
+                                <option value="written" selected>📖 Written Book</option>
+                                <option value="audio">🎧 Audio Book</option>
+                                <option value="both">📖 Both Written & Audio</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                                <input type="checkbox" name="for_sale" value="1" checked>
+                                💳 Available for Purchase
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                                <input type="checkbox" name="for_borrow" value="1" checked>
+                                📚 Available for Borrow
+                            </label>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Publisher</label>
@@ -218,6 +247,30 @@
                         <div class="form-group">
                             <label class="form-label">Copies</label>
                             <input type="number" name="copies" id="edit-book-copies" class="form-control" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price ($)</label>
+                            <input type="number" name="price" id="edit-book-price" class="form-control" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Format</label>
+                            <select name="format" id="edit-book-format" class="form-control">
+                                <option value="written">📖 Written Book</option>
+                                <option value="audio">🎧 Audio Book</option>
+                                <option value="both">📖 Both Written & Audio</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                                <input type="checkbox" name="for_sale" id="edit-book-for_sale" value="1">
+                                💳 Available for Purchase
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                                <input type="checkbox" name="for_borrow" id="edit-book-for_borrow" value="1">
+                                📚 Available for Borrow
+                            </label>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Publisher</label>
@@ -305,6 +358,10 @@
             document.getElementById('edit-book-year').value        = button.dataset.year || '';
             document.getElementById('edit-book-pages').value       = button.dataset.pages || '';
             document.getElementById('edit-book-copies').value      = button.dataset.copies || '';
+            document.getElementById('edit-book-price').value       = button.dataset.price || '';
+            document.getElementById('edit-book-format').value      = button.dataset.format || 'written';
+            document.getElementById('edit-book-for_sale').checked   = (parseInt(button.dataset.for_sale || '1')) === 1;
+            document.getElementById('edit-book-for_borrow').checked = (parseInt(button.dataset.for_borrow || '1')) === 1;
             document.getElementById('edit-book-publisher').value   = button.dataset.publisher || '';
             document.getElementById('edit-book-description').value = button.dataset.description || '';
 
@@ -322,7 +379,7 @@
             }
 
             // PDF preview
-            const pdfPath    = button.dataset.pdf || '';
+            const pdfPath   = button.dataset.pdf || '';
             const pdfPreview = document.getElementById('edit-pdf-preview');
             const pdfName    = document.getElementById('edit-pdf-name');
             if (pdfPath) {

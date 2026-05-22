@@ -2,7 +2,10 @@
 <?php View::includeLayout('header', ['title' => $title]); ?>
 <?php View::includeLayout('navbar'); ?>
 
+<div class="page-background"></div>
 <div class="page-wrapper" style="padding-top: var(--navbar-height);">
+    <!-- Floating decorations -->
+    <div class="floating-decorations" aria-hidden="true"></div>
     <section class="section">
         <div class="container container-md">
             <!-- Profile Header -->
@@ -72,7 +75,7 @@
                             <!-- Password update posts to the same profile endpoint with an action flag -->
                             <form method="POST" action="<?= url('user/profile') ?>" data-validate>
                                 <input type="hidden" name="action" value="update_password">
-                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? Csrf::token() ?>">
+                                <?= Csrf::field() ?>
 
                                 <div class="form-group">
                                     <label class="form-label" for="current_password">Current Password</label>
@@ -104,8 +107,13 @@
                             <!-- Delete account submits to profile with an action flag to allow confirmation flows -->
                             <form method="POST" action="<?= url('user/profile') ?>" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');" style="display:inline;">
                                 <input type="hidden" name="action" value="delete_account">
-                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? Csrf::token() ?>">
+                                <?= Csrf::field() ?>
                                 <button type="submit" class="btn btn-danger btn-sm">Delete Account</button>
+                            </form>
+
+                            <form method="POST" action="<?= url('user/logout-all-sessions') ?>" style="display:inline; margin-left:8px;">
+                                <?= Csrf::field() ?>
+                                <button type="submit" class="btn btn-secondary btn-sm">Logout from All Sessions</button>
                             </form>
                         </div>
                     </div>

@@ -19,6 +19,58 @@ class AdminController extends Controller {
         return (int)($stmt->fetch()['total'] ?? 0);
     }
 
+    private function ensureSettingsTable(): void {
+        Database::getInstance()->exec(
+            "CREATE TABLE IF NOT EXISTS settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                setting_key VARCHAR(191) NOT NULL UNIQUE,
+                setting_value TEXT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+    }
+
+    /**
+     * Ensure optional book columns exist (price, format, for_sale, for_borrow).
+     * This is defensive: if migrations haven't been run, admin actions will create the columns.
+     */
+    private function ensureBookColumns(): void {
+        $db = Database::getInstance();
+        // price
+        if (!Database::columnExists('books', 'price')) {
+            try {
+                $db->exec("ALTER TABLE books ADD COLUMN price DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER rating");
+            } catch (Throwable $e) {
+                // ignore - maybe another process added it simultaneously
+                error_log('ensureBookColumns: failed to add price column: ' . $e->getMessage());
+            }
+        }
+        // format
+        if (!Database::columnExists('books', 'format')) {
+            try {
+                $db->exec("ALTER TABLE books ADD COLUMN format ENUM('written','audio','both') DEFAULT 'written' AFTER price");
+            } catch (Throwable $e) {
+                error_log('ensureBookColumns: failed to add format column: ' . $e->getMessage());
+            }
+        }
+        // for_sale
+        if (!Database::columnExists('books', 'for_sale')) {
+            try {
+                $db->exec("ALTER TABLE books ADD COLUMN for_sale TINYINT(1) DEFAULT 1 AFTER format");
+            } catch (Throwable $e) {
+                error_log('ensureBookColumns: failed to add for_sale column: ' . $e->getMessage());
+            }
+        }
+        // for_borrow
+        if (!Database::columnExists('books', 'for_borrow')) {
+            try {
+                $db->exec("ALTER TABLE books ADD COLUMN for_borrow TINYINT(1) DEFAULT 1 AFTER for_sale");
+            } catch (Throwable $e) {
+                error_log('ensureBookColumns: failed to add for_borrow column: ' . $e->getMessage());
+            }
+        }
+    }
+
     public function dashboard(): void {
         $this->ensureAdmin();
         require_once APP_PATH . '/Models/Book.php';
@@ -138,12 +190,18 @@ class AdminController extends Controller {
 
     public function storeBook(): void {
         $this->ensureAdmin();
+        $this->ensureBookColumns();
         if (!$this->validateCsrf()) {
             setFlash('error', 'Invalid request.');
             $this->redirect('admin/books');
         }
 
         require_once APP_PATH . '/Models/Book.php';
+
+        $copies = (int)($_POST['copies'] ?? 1);
+        if ($copies < 1) {
+            $copies = 1;
+        }
 
         $data = [
             'title'       => trim($_POST['title']       ?? ''),
@@ -152,13 +210,30 @@ class AdminController extends Controller {
             'category_id' => $_POST['category_id']     ?? null,
             'year'        => $_POST['year']             ?? null,
             'pages'       => $_POST['pages']            ?? null,
-            'copies'      => $_POST['copies']           ?? 1,
+            'copies'      => $copies,
+            'price'       => $_POST['price']            ?? 0,
+            'format'      => $_POST['format']           ?? 'written',
+            'for_sale'    => isset($_POST['for_sale']) ? 1 : 0,
+            'for_borrow'  => isset($_POST['for_borrow']) ? 1 : 0,
             'publisher'   => trim($_POST['publisher']   ?? ''),
             'description' => trim($_POST['description'] ?? ''),
         ];
 
         if ($data['title'] === '' || $data['author'] === '' || $data['isbn'] === '') {
             setFlash('error', 'Title, author, and ISBN are required.');
+            $this->redirect('admin/books');
+        }
+
+        // Validate price
+        $price = (float)($data['price'] ?? 0);
+        if ($price < 0) {
+            setFlash('error', 'Price cannot be negative.');
+            $this->redirect('admin/books');
+        }
+
+        // Validate format
+        if (!in_array($data['format'], ['written', 'audio', 'both'], true)) {
+            setFlash('error', 'Invalid format.');
             $this->redirect('admin/books');
         }
 
@@ -212,6 +287,7 @@ class AdminController extends Controller {
 
     public function updateBook(): void {
         $this->ensureAdmin();
+        $this->ensureBookColumns();
         if (!$this->validateCsrf()) {
             setFlash('error', 'Invalid request.');
             $this->redirect('admin/books');
@@ -232,6 +308,11 @@ class AdminController extends Controller {
         }
         $book = Book::normalise($book);
 
+        $copies = array_key_exists('copies', $_POST) ? (int)($_POST['copies'] ?? 0) : (int)($book['copies'] ?? 1);
+        if ($copies < 1) {
+            $copies = 1;
+        }
+
         $data = [
             'title'       => trim($_POST['title']       ?? ''),
             'author'      => trim($_POST['author']      ?? ''),
@@ -239,10 +320,27 @@ class AdminController extends Controller {
             'category_id' => $_POST['category_id']     ?? null,
             'year'        => $_POST['year']             ?? null,
             'pages'       => $_POST['pages']            ?? null,
-            'copies'      => $_POST['copies']           ?? null,
+            'copies'      => $copies,
+            'price'       => $_POST['price']            ?? $book['price'] ?? 0,
+            'format'      => $_POST['format']           ?? $book['format'] ?? 'written',
+            'for_sale'    => isset($_POST['for_sale']) ? 1 : 0,
+            'for_borrow'  => isset($_POST['for_borrow']) ? 1 : 0,
             'publisher'   => trim($_POST['publisher']   ?? ''),
             'description' => trim($_POST['description'] ?? ''),
         ];
+
+        //Validate price
+        $price = (float)($data['price'] ?? 0);
+        if ($price < 0) {
+            setFlash('error', 'Price cannot be negative.');
+            $this->redirect('admin/books');
+        }
+
+        // Validate format
+        if (!in_array($data['format'], ['written', 'audio', 'both'], true)) {
+            setFlash('error', 'Invalid format.');
+            $this->redirect('admin/books');
+        }
 
         $coverUpload = $this->saveUpload($_FILES['cover_image'] ?? null, 'image');
         if (!empty($coverUpload['error'])) {
@@ -660,6 +758,44 @@ class AdminController extends Controller {
         }
     }
 
+    public function reviews(): void {
+        $this->ensureAdmin();
+        require_once APP_PATH . '/Models/Review.php';
+
+        $search = trim($_GET['q'] ?? '');
+        $rating = trim($_GET['rating'] ?? '');
+        $page = max(1, (int)($_GET['page'] ?? 1));
+
+        $result = Review::listForAdmin($search, $rating, $page, 12);
+
+        $this->view('admin/reviews', [
+            'title' => 'Manage Reviews',
+            'reviews' => $result['data'],
+            'pagination' => $result,
+            'filters' => ['q' => $search, 'rating' => $rating],
+            'layout' => 'admin',
+        ]);
+    }
+
+    public function deleteReview(): void {
+        $this->ensureAdmin();
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 422);
+        }
+
+        require_once APP_PATH . '/Models/Review.php';
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->json(['success' => false, 'message' => 'Invalid review.'], 422);
+        }
+
+        if (Review::deleteByAdmin($id)) {
+            $this->json(['success' => true, 'message' => 'Review deleted.']);
+        }
+
+        $this->json(['success' => false, 'message' => 'Review not found or already deleted.'], 404);
+    }
+
     // ── Reports ────────────────────────────────────────────────────────────
 
     public function reports(): void {
@@ -689,6 +825,7 @@ class AdminController extends Controller {
 
     public function settings(): void {
         $this->ensureAdmin();
+        $this->ensureSettingsTable();
         $dbConnected = true;
         $dbError     = null;
         $settings    = []; // مصفوفة فارغة لتخزين الإعدادات القادمة من الداتا بيس
@@ -728,6 +865,7 @@ class AdminController extends Controller {
         }
 
         try {
+            $this->ensureSettingsTable();
             $db = Database::getInstance();
 
             // تجهيز استعلام مرن يقوم بالإدخال أو التحديث تلقائياً إذا كان المفتاح موجوداً
@@ -739,7 +877,7 @@ class AdminController extends Controller {
             // الدوران على كل الحقول المرسلة من واجهة الإعدادات وحفظها
             foreach ($_POST as $key => $value) {
                 // تخطي توكن الحماية لأنه ليس جزءاً من إعدادات النظام
-                if ($key === 'csrf_token') {
+                if ($key === 'csrf_token' || $key === '_token' || (strlen($key) > 0 && $key[0] === '_')) {
                     continue;
                 }
 

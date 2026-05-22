@@ -1,11 +1,10 @@
 <?php View::includeLayout('header', ['title' => $title ?? 'Sign Up']); ?>
 
+<div class="page-background"></div>
 <div class="page-wrapper">
     <div class="floating-decorations" aria-hidden="true"></div>
 
     <div class="auth-page">
-
-
         <div class="auth-card glass-card">
             <div class="card-body">
                 <div class="auth-header">
@@ -16,8 +15,8 @@
 
                 <form method="POST" action="<?= url('register') ?>" data-validate>
                     <?= Csrf::field() ?>
-                    <div style="width:100%; max-width:440px; text-align:center; margin:0;">
-                        <a href="<?= url('') ?>" class="text-sm" style="display:block; margin:0;">← Back to home</a>
+                    <div class="auth-back-link">
+                        <a href="<?= url('') ?>" class="text-sm">← Back to home</a>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="name">Full Name</label>
@@ -69,8 +68,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label >
-                            <input type="checkbox" name="terms" required> I agree to the <a href="#" data-modal="modal-terms" aria-haspopup="dialog" onclick="event.preventDefault();">Terms of Service</a> and <a href="#" data-modal="modal-privacy" aria-haspopup="dialog" onclick="event.preventDefault();">Privacy Policy</a>
+                        <label class="form-check">
+                            <input type="checkbox" name="terms" required>
+                            <span>I agree to the <a href="#" data-modal="modal-terms" aria-haspopup="dialog" onclick="event.preventDefault();">Terms of Service</a> and <a href="#" data-modal="modal-privacy" aria-haspopup="dialog" onclick="event.preventDefault();">Privacy Policy</a></span>
                         </label>
                     </div>
 

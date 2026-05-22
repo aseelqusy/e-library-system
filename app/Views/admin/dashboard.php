@@ -1,6 +1,7 @@
 <?php View::includeLayout('header', ['title' => $title]); ?>
 <?php View::includeLayout('navbar'); ?>
 
+<div class="page-background"></div>
 <div class="admin-layout">
     <?php View::partial('admin/sidebar'); ?>
 

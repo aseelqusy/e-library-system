@@ -4,6 +4,10 @@ class Auth {
 
     private static array $defaultUsers = [];
 
+    private static function hasSessionVersionColumn(): bool {
+        return Database::columnExists('users', 'session_version');
+    }
+
     public static function init(): void {
         // No-op: authentication uses database records only.
     }
@@ -31,6 +35,11 @@ class Auth {
                 'session_id' => session_id(),
                 'logged_in_at' => date('c'),
             ];
+
+            if (self::hasSessionVersionColumn()) {
+                $_SESSION['user']['session_version'] = (int)($user['session_version'] ?? 0);
+            }
+
             return true;
         }
         return false;
@@ -49,11 +58,27 @@ class Auth {
     }
 
     public static function check(): bool {
-        return isset($_SESSION['user']);
+        if (!isset($_SESSION['user'])) {
+            return false;
+        }
+
+        if (self::hasSessionVersionColumn()) {
+            $sessionVersion = (int)($_SESSION['user']['session_version'] ?? -1);
+            $stmt = Database::getInstance()->prepare("SELECT session_version FROM users WHERE id = ?");
+            $stmt->execute([(int)($_SESSION['user']['id'] ?? 0)]);
+            $current = $stmt->fetch();
+
+            if (!$current || (int)($current['session_version'] ?? -1) !== $sessionVersion) {
+                self::logout();
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static function user(): ?array {
-        return $_SESSION['user'] ?? null;
+        return self::check() ? ($_SESSION['user'] ?? null) : null;
     }
 
     public static function isAdmin(): bool {
@@ -71,8 +96,11 @@ class Auth {
     }
 
     public static function logout(): void {
-        unset($_SESSION['user']);
-        session_regenerate_id(true);
+        $_SESSION = [];
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
     }
 
     public static function id(): ?int {
@@ -87,7 +115,7 @@ class Auth {
     }
 
     public static function updateUser(int $id, array $data): bool {
-        $fields = ['name', 'email', 'avatar'];
+        $fields = ['name', 'email', 'avatar', 'password', 'is_active'];
         if (Database::columnExists('users', 'phone')) $fields[] = 'phone';
         if (Database::columnExists('users', 'bio')) $fields[] = 'bio';
 
@@ -110,8 +138,30 @@ class Auth {
             $_SESSION['user']['name']  = $data['name'] ?? $_SESSION['user']['name'];
             $_SESSION['user']['email'] = $data['email'] ?? $_SESSION['user']['email'];
             if (isset($data['avatar'])) $_SESSION['user']['avatar'] = $data['avatar'];
+
+            if (array_key_exists('is_active', $data) && (int)$data['is_active'] === 0) {
+                self::logout();
+            }
+
+            if (array_key_exists('password', $data)) {
+                unset($_SESSION['user']['session_version']);
+            }
         }
 
         return $ok;
+    }
+
+    public static function logoutAllSessions(): bool {
+        if (!self::check()) {
+            return false;
+        }
+
+        if (self::hasSessionVersionColumn()) {
+            $stmt = Database::getInstance()->prepare("UPDATE users SET session_version = COALESCE(session_version, 0) + 1 WHERE id = ?");
+            $stmt->execute([self::id()]);
+        }
+
+        self::logout();
+        return true;
     }
 }

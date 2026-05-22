@@ -12,11 +12,12 @@ A modern, dark-themed library management web application built with PHP 8+ MVC a
 - **Command Palette** — `Ctrl + K` quick-search overlay
 - **Responsive Design** — Mobile-first breakpoints at 480/768/1024px
 - **Session-Based Auth** — Login, register, role-based access (admin/member)
-- **Full Catalog** — Browse, search, filter by category, sort, book details with reviews
+- **Full Catalog** — Browse, search, filter by category, sort, book details with live reviews
 - **User Dashboard** — Profile, active borrows, wishlist, borrowing history
 - **Admin Panel** — Dashboard with charts, manage books/users/borrows/categories, reports, settings
 - **CSRF Protection** — Token-based form protection
-- **No Database Required** — Runs entirely on placeholder arrays, ready to swap to MySQL/PDO
+- **Database-Backed Models** — PDO-powered users, books, borrows, reviews, notifications, and wishlists
+- **Responsive Reusable Footer** — Shared footer component across the app
 
 ---
 
@@ -26,7 +27,7 @@ A modern, dark-themed library management web application built with PHP 8+ MVC a
 library-app/
 ├── app/
 │   ├── Controllers/        # 8 controllers (Home, Auth, Catalog, Book, User, Borrow, Admin, Api)
-│   ├── Models/             # 6 models with placeholder data (Book, Category, Borrow, Review, Notification, User)
+│   ├── Models/             # 6 database-backed models (Book, Category, Borrow, Review, Notification, User)
 │   └── Views/
 │       ├── admin/          # dashboard, books, users, borrows, categories, reports, settings, sidebar
 │       ├── auth/           # login, register, forgot
@@ -107,7 +108,7 @@ The floating music player appears in the bottom-right corner. It uses placeholde
 
 ## 🗄 Database Migration Guide
 
-The app currently uses in-memory arrays. To switch to MySQL:
+The app is database-backed. Use the bundled schema or migrations to set up MySQL:
 
 ### 1. Create Database
 

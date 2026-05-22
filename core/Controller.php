@@ -36,6 +36,12 @@ class Controller {
     }
 
     protected function validateCsrf(): bool {
-        return Csrf::validate($_POST['_token'] ?? '');
+        $token = $_POST['_token']
+            ?? $_POST['csrf_token']
+            ?? $_SERVER['HTTP_X_CSRF_TOKEN']
+            ?? $_SERVER['HTTP_X_XSRF_TOKEN']
+            ?? '';
+
+        return Csrf::validate((string)$token);
     }
 }

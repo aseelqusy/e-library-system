@@ -34,12 +34,51 @@ class Book {
     }
 
     public static function search(string $query): array {
-        $q = '%' . $query . '%';
-        $stmt = self::db()->prepare(
-            "SELECT * FROM books WHERE title LIKE ? OR author LIKE ? OR isbn LIKE ? ORDER BY id DESC"
-        );
-        $stmt->execute([$q, $q, $q]);
-        return $stmt->fetchAll();
+        $query = trim($query);
+        if ($query === '') {
+            return [];
+        }
+
+        $books = array_map([self::class, 'normalise'], self::all());
+        $terms = preg_split('/\s+/', mb_strtolower($query)) ?: [];
+        $needle = mb_strtolower($query);
+
+        foreach ($books as &$book) {
+            $haystackTitle = mb_strtolower((string)($book['title'] ?? ''));
+            $haystackAuthor = mb_strtolower((string)($book['author'] ?? ''));
+            $haystackIsbn = mb_strtolower((string)($book['isbn'] ?? ''));
+            $haystackDesc = mb_strtolower((string)($book['description'] ?? ''));
+
+            $score = 0;
+            if ($haystackTitle === $needle) $score += 100;
+            if ($haystackAuthor === $needle) $score += 90;
+            if ($haystackIsbn === $needle) $score += 90;
+            // Compatibility: avoid PHP 8 only functions
+            if ($needle !== '' && mb_strpos($haystackTitle, $needle) === 0) $score += 70;
+            if ($needle !== '' && mb_strpos($haystackAuthor, $needle) === 0) $score += 60;
+            if ($needle !== '' && mb_strpos($haystackTitle, $needle) !== false) $score += 40;
+            if ($needle !== '' && mb_strpos($haystackAuthor, $needle) !== false) $score += 30;
+            if ($needle !== '' && mb_strpos($haystackIsbn, $needle) !== false) $score += 35;
+            if ($needle !== '' && mb_strpos($haystackDesc, $needle) !== false) $score += 10;
+
+            foreach ($terms as $term) {
+                if ($term === '') continue;
+                if (mb_strpos($haystackTitle, $term) !== false) $score += 15;
+                if (mb_strpos($haystackAuthor, $term) !== false) $score += 12;
+                if (mb_strpos($haystackIsbn, $term) !== false) $score += 8;
+                if (mb_strpos($haystackDesc, $term) !== false) $score += 4;
+            }
+
+            $book['_score'] = $score;
+        }
+        unset($book);
+
+        $matches = array_values(array_filter($books, fn($book) => ($book['_score'] ?? 0) > 0));
+        usort($matches, function ($a, $b) {
+            return ($b['_score'] <=> $a['_score']) ?: ((int)($b['id'] ?? 0) <=> (int)($a['id'] ?? 0));
+        });
+
+        return array_slice($matches, 0, 50);
     }
 
     public static function count(): int {
@@ -96,8 +135,8 @@ class Book {
     }
 
     public static function create(array $data): int {
-        $copies     = max(0, (int)($data['copies'] ?? 1));
-        $available  = isset($data['available']) ? (int)$data['available'] : $copies;
+        $copies     = max(1, (int)($data['copies'] ?? 1));
+        $available  = isset($data['available']) ? max(1, (int)$data['available']) : $copies;
         $categoryId = $data['category_id'] ?? null;
         $categoryId = ($categoryId === '' || $categoryId === null) ? null : (int)$categoryId;
 
@@ -110,9 +149,25 @@ class Book {
         if ($pdfCol !== null) {
             $columns[] = $pdfCol;
         }
+        if (Database::columnExists('books', 'price')) {
+            $columns[] = 'price';
+        }
+        if (Database::columnExists('books', 'format')) {
+            $columns[] = 'format';
+        }
+        if (Database::columnExists('books', 'for_sale')) {
+            $columns[] = 'for_sale';
+        }
+        if (Database::columnExists('books', 'for_borrow')) {
+            $columns[] = 'for_borrow';
+        }
 
         $coverValue = $data['cover_image'] ?? $data['cover'] ?? null;
         $pdfValue   = $data['pdf_file'] ?? null;
+        $price      = max(0, (float)($data['price'] ?? 0));
+        $format     = in_array($data['format'] ?? 'written', ['written', 'audio', 'both'], true) ? $data['format'] : 'written';
+        $forSale    = (int)(isset($data['for_sale']) ? $data['for_sale'] : 1);
+        $forBorrow  = (int)(isset($data['for_borrow']) ? $data['for_borrow'] : 1);
 
         $columnValues = [
             'title'       => trim($data['title'] ?? ''),
@@ -128,8 +183,12 @@ class Book {
             'publisher'   => trim($data['publisher'] ?? ''),
             'rating'      => (float)($data['rating'] ?? 0),
             'copies'      => $copies,
-            'available'   => max(0, min($available, $copies)),
+            'available'   => max(1, min($available, $copies)),
             'featured'    => (int)($data['featured'] ?? 0),
+            'price'       => round($price, 2),
+            'format'      => $format,
+            'for_sale'    => $forSale,
+            'for_borrow'  => $forBorrow,
         ];
 
         $values       = array_map(fn($col) => $columnValues[$col] ?? null, $columns);
@@ -153,6 +212,18 @@ class Book {
         if ($pdfCol !== null) {
             $allowed[] = $pdfCol;
         }
+        if (Database::columnExists('books', 'price')) {
+            $allowed[] = 'price';
+        }
+        if (Database::columnExists('books', 'format')) {
+            $allowed[] = 'format';
+        }
+        if (Database::columnExists('books', 'for_sale')) {
+            $allowed[] = 'for_sale';
+        }
+        if (Database::columnExists('books', 'for_borrow')) {
+            $allowed[] = 'for_borrow';
+        }
 
         if (array_key_exists('copies', $data) && !array_key_exists('available', $data)) {
             $current = self::find($id);
@@ -167,6 +238,18 @@ class Book {
         }
         if ($pdfCol !== null && array_key_exists('pdf_file', $data)) {
             $data[$pdfCol] = $data['pdf_file'];
+        }
+
+        // Validate and normalize price
+        if (array_key_exists('price', $data)) {
+            $data['price'] = round(max(0, (float)($data['price'] ?? 0)), 2);
+        }
+
+        // Validate format
+        if (array_key_exists('format', $data)) {
+            if (!in_array($data['format'], ['written', 'audio', 'both'], true)) {
+                $data['format'] = 'written';
+            }
         }
 
         $fields = [];
@@ -191,9 +274,45 @@ class Book {
     }
 
     public static function adjustAvailable(int $id, int $delta): bool {
-        $stmt = self::db()->prepare(
-            "UPDATE books SET available = LEAST(GREATEST(available + ?, 0), copies) WHERE id = ?"
-        );
-        return $stmt->execute([$delta, $id]);
+        logDebug('Book::adjustAvailable() called', [
+            'book_id' => $id,
+            'delta' => $delta,
+        ], 'books');
+
+        try {
+            $stmt = self::db()->prepare(
+                "UPDATE books SET available = LEAST(GREATEST(available + ?, 0), copies) WHERE id = ?"
+            );
+
+            $result = $stmt->execute([$delta, $id]);
+
+            if (!$result) {
+                logError('Book availability update failed', null, [
+                    'book_id' => $id,
+                    'delta' => $delta,
+                    'error_info' => $stmt->errorInfo(),
+                ], 'books');
+                return false;
+            }
+
+            logDebug('Book availability updated successfully', [
+                'book_id' => $id,
+                'delta' => $delta,
+                'rows_affected' => $stmt->rowCount(),
+            ], 'books');
+
+            return true;
+        } catch (Throwable $e) {
+            logError('Book::adjustAvailable() failed', $e, [
+                'book_id' => $id,
+                'delta' => $delta,
+            ], 'books');
+            throw $e;
+        }
+    }
+
+    public static function updateRating(int $id, float $rating): bool {
+        $stmt = self::db()->prepare("UPDATE books SET rating = ? WHERE id = ?");
+        return $stmt->execute([round(max(0, min(5, $rating)), 1), $id]);
     }
 }

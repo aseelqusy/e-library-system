@@ -20,6 +20,14 @@ class Notification {
         return $stmt->fetchAll();
     }
 
+    public static function latestForUser(int $userId, int $limit = 10): array {
+        $stmt = self::db()->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT ?");
+        $stmt->bindValue(1, $userId, PDO::PARAM_INT);
+        $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     public static function unreadCount(int $userId): int {
         $stmt = self::db()->prepare("SELECT COUNT(*) AS total FROM notifications WHERE user_id = ? AND is_read = 0");
         $stmt->execute([$userId]);
@@ -41,6 +49,11 @@ class Notification {
      */
     public static function markAllAsRead(int $userId): bool {
         return self::markAllReadForUser($userId);
+    }
+
+    public static function markRead(int $notificationId, int $userId): bool {
+        $stmt = self::db()->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
+        return $stmt->execute([$notificationId, $userId]);
     }
 
     public static function create(int $userId, string $message, string $type): void {

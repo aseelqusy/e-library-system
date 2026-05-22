@@ -11,7 +11,7 @@ class Validator {
     public function required(string $field, string $label = ''): self {
         $label = $label ?: ucfirst($field);
         if (empty(trim($this->data[$field] ?? ''))) {
-            $this->errors[$field] = "{$label} is required.";
+            $this->errors[$field] = "{$label} is required";
         }
         return $this;
     }
@@ -19,7 +19,7 @@ class Validator {
     public function email(string $field, string $label = ''): self {
         $label = $label ?: ucfirst($field);
         if (!empty($this->data[$field]) && !filter_var($this->data[$field], FILTER_VALIDATE_EMAIL)) {
-            $this->errors[$field] = "{$label} must be a valid email address.";
+            $this->errors[$field] = "{$label} must be a valid email address";
         }
         return $this;
     }
@@ -27,7 +27,7 @@ class Validator {
     public function minLength(string $field, int $min, string $label = ''): self {
         $label = $label ?: ucfirst($field);
         if (!empty($this->data[$field]) && strlen($this->data[$field]) < $min) {
-            $this->errors[$field] = "{$label} must be at least {$min} characters.";
+            $this->errors[$field] = "{$label} must be at least {$min} characters";
         }
         return $this;
     }
@@ -35,7 +35,7 @@ class Validator {
     public function maxLength(string $field, int $max, string $label = ''): self {
         $label = $label ?: ucfirst($field);
         if (!empty($this->data[$field]) && strlen($this->data[$field]) > $max) {
-            $this->errors[$field] = "{$label} must be no more than {$max} characters.";
+            $this->errors[$field] = "{$label} must be no more than {$max} characters";
         }
         return $this;
     }
@@ -43,7 +43,7 @@ class Validator {
     public function matches(string $field, string $matchField, string $label = ''): self {
         $label = $label ?: ucfirst($field);
         if (($this->data[$field] ?? '') !== ($this->data[$matchField] ?? '')) {
-            $this->errors[$field] = "{$label} fields do not match.";
+            $this->errors[$field] = "{$label} fields do not match";
         }
         return $this;
     }
