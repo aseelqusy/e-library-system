@@ -183,6 +183,25 @@ class UserController extends Controller {
         ]);
     }
 
+    public function reviews(): void {
+        $this->requireAuth();
+        require_once APP_PATH . '/Models/Review.php';
+
+        $reviews = Review::forUser((int)Auth::id());
+        $averageRating = !empty($reviews)
+            ? round(array_sum(array_map(static fn(array $review): float => (float)($review['rating'] ?? 0), $reviews)) / count($reviews), 1)
+            : 0.0;
+
+        $this->view('user/my-reviews', [
+            'title' => 'My Reviews',
+            'reviews' => $reviews,
+            'reviewCount' => count($reviews),
+            'averageRating' => $averageRating,
+            'layout' => 'public',
+            'current_page' => 'reviews',
+        ]);
+    }
+
     private function countPendingOrders(array $orders): int {
         $pending = 0;
         foreach ($orders as $order) {

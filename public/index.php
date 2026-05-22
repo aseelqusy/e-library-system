@@ -44,6 +44,7 @@ $router->get('home', 'HomeController@index');
 $router->get('about', 'PageController@about');
 $router->get('contact', 'PageController@contact');
 $router->post('contact', 'PageController@submitContact');
+$router->post('activities/book-seat', 'PageController@bookSeat');
 
 // Auth
 $router->get('login',            'AuthController@loginForm');
@@ -72,6 +73,7 @@ $router->get('user/profile',          'UserController@profile');
 $router->post('user/profile',         'UserController@updateProfile');
 $router->post('user/logout-all-sessions', 'UserController@logoutAllSessions');
 $router->get('user/borrows',          'UserController@borrows');
+$router->get('user/reviews',          'UserController@reviews');
 $router->get('user/wishlist',         'UserController@wishlist');
 $router->post('user/wishlist/toggle', 'UserController@toggleWishlist');
 $router->get('user/history',          'UserController@history');
@@ -122,6 +124,9 @@ $router->post('admin/categories/delete',      'AdminController@deleteCategory');
 $router->get('admin/reports/export',       'ReportController@export'); // مضاف في الأعلى وموجه للـ ReportController
 $router->get('admin/reports',   'AdminController@reports');
 $router->get('admin/reviews',   'AdminController@reviews');
+$router->get('admin/messages',   'AdminController@messages');
+$router->get('admin/purchases',  'AdminController@purchases');
+$router->get('admin/activities', 'AdminController@activities');
 $router->post('admin/reviews/delete', 'AdminController@deleteReview');
 $router->get('admin/settings',  'AdminController@settings');
 $router->post('admin/settings', 'AdminController@updateSettings');

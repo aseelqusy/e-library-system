@@ -157,3 +157,14 @@
 [2026-05-22 03:14:01.000000] Adjusting book availability | {"book_id":20,"delta":-1}
 [2026-05-22 03:14:01.000000] Book availability adjusted | {"book_id":20}
 [2026-05-22 03:14:01.000000] Transaction committed successfully | {"order_id":22}
+[2026-05-22 14:00:18.000000] Payment processing started | {"user_id":11,"book_id":50,"quantity":1,"payment_method":"card"}
+[2026-05-22 14:00:18.000000] Book retrieved | {"book_id":50,"title":"Sapiens: A Brief History of Humankind","available":297,"price":"15.99"}
+[2026-05-22 14:00:18.000000] Processing payment gateway | {"book_id":50,"quantity":1,"unit_price":15.99,"total":15.99,"payment_method":"card"}
+[2026-05-22 14:00:18.000000] Payment gateway successful | {"transaction_id":"TXN-6a1045520a046"}
+[2026-05-22 14:00:18.000000] Orders table verified before transaction | []
+[2026-05-22 14:00:18.000000] Transaction started | []
+[2026-05-22 14:00:18.000000] Creating order record | {"user_id":11,"book_id":50,"quantity":1,"unit_price":15.99,"total_price":15.99}
+[2026-05-22 14:00:18.000000] Order created successfully | {"order_id":26}
+[2026-05-22 14:00:18.000000] Adjusting book availability | {"book_id":50,"delta":-1}
+[2026-05-22 14:00:18.000000] Book availability adjusted | {"book_id":50}
+[2026-05-22 14:00:18.000000] Transaction committed successfully | {"order_id":26}

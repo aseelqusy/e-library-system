@@ -175,12 +175,12 @@ View::includeLayout('header', ['title' => $title]);
                        data-book-url="<?= url('books/' . $book['id']) ?>">
                          <div class="book-cover">
                              <?php if (!empty($cover)): ?>
-                                 <img src="<?= e($cover) ?>"
-                                      alt="<?= e($book['title']) ?>"
-                                      class="book-cover-img"
-                                      data-book-id="<?= $book['id'] ?>"
-                                      data-isbn="<?= e($book['isbn'] ?? '') ?>"
-                                      onerror="this.style.display='none'; this.parentElement.innerHTML='📖';">
+                                  <img src="<?= e($cover) ?>"
+                                       alt="<?= e($book['title']) ?>"
+                                       class="book-cover-img landing-cover-img"
+                                       data-book-id="<?= $book['id'] ?>"
+                                       data-isbn="<?= e($book['isbn'] ?? '') ?>">
+                                  <div class="landing-cover-fallback" style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-size:3rem;">📖</div>
                              <?php else: ?>
                                  <span aria-hidden="true" style="font-size:3rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">📖</span>
                              <?php endif; ?>
@@ -231,12 +231,29 @@ View::includeLayout('header', ['title' => $title]);
                         <article class="activity-card glass-card">
                             <div class="activity-cover">
                                 <img src="<?= e($activityImage) ?>" alt="<?= e($activity['title'] ?? 'Activity') ?>" loading="lazy">
+
+                                <!-- Hover Overlay -->
+                                <div class="activity-overlay">
+                                    <button type="button"
+                                            class="btn btn-primary btn-sm join-us-btn"
+                                            data-activity-title="<?= e($activity['title'] ?? '') ?>"
+                                            data-activity-date="<?= e(!empty($activity['activity_date']) ? formatDate($activity['activity_date']) : '') ?>">
+                                        Join Us
+                                    </button>
+                                </div>
                             </div>
+
                             <div class="book-info">
                                 <h4 class="book-title"><?= e($activity['title'] ?? '') ?></h4>
-                                <p class="book-author"><?= e($activity['description'] ?? '') ?></p>
+
+                                <p class="book-author">
+                                    <?= e($activity['description'] ?? '') ?>
+                                </p>
+
                                 <div class="book-meta">
-                                    <span class="chip chip-primary"><?= !empty($activity['activity_date']) ? formatDate($activity['activity_date']) : 'Upcoming' ?></span>
+            <span class="chip chip-primary">
+                <?= !empty($activity['activity_date']) ? formatDate($activity['activity_date']) : 'Upcoming' ?>
+            </span>
                                 </div>
                             </div>
                         </article>
@@ -282,6 +299,128 @@ View::includeLayout('header', ['title' => $title]);
             <?php endif; ?>
         </div>
     </section>
+
+    <div class="modal-overlay" id="join-us-modal" aria-hidden="true">
+        <div class="modal" style="max-width:560px;">
+            <div class="modal-header">
+                <h3 id="join-us-modal-title">Book a Seat</h3>
+                <button type="button" class="btn btn-ghost btn-icon modal-close" id="join-us-modal-close">✕</button>
+            </div>
+            <form id="join-us-form">
+                <?= Csrf::field() ?>
+                <input type="hidden" name="activity_title" id="join-us-activity-title">
+                <input type="hidden" name="activity_date" id="join-us-activity-date">
+                <div class="modal-body" style="display:grid;gap:14px;">
+                    <div class="form-group">
+                        <label class="form-label" for="join-name">Full Name</label>
+                        <input type="text" id="join-name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="join-email">Email</label>
+                        <input type="email" id="join-email" name="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="join-phone">Phone</label>
+                        <input type="tel" id="join-phone" name="phone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="join-seats">Seats to Book</label>
+                        <input type="number" id="join-seats" name="seats" class="form-control" min="1" max="20" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="join-message">Notes</label>
+                        <textarea id="join-message" name="message" class="form-control" rows="3" placeholder="Optional notes or accessibility requirements"></textarea>
+                    </div>
+                    <p class="text-muted text-sm" id="join-us-activity-summary"></p>
+                    <p class="text-muted text-sm" id="join-us-feedback" style="margin:0;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="join-us-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="join-us-submit">Book a Seat</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.landing-cover-img').forEach((img) => {
+        img.addEventListener('error', () => {
+            img.remove();
+            img.parentElement.querySelector('.landing-cover-fallback')?.style && (img.parentElement.querySelector('.landing-cover-fallback').style.display = 'flex');
+        }, { once: true });
+    });
+
+    const modal = document.getElementById('join-us-modal');
+    const form = document.getElementById('join-us-form');
+    const feedback = document.getElementById('join-us-feedback');
+    const summary = document.getElementById('join-us-activity-summary');
+    const titleInput = document.getElementById('join-us-activity-title');
+    const dateInput = document.getElementById('join-us-activity-date');
+    const submitBtn = document.getElementById('join-us-submit');
+    const base = document.querySelector('meta[name="base-url"]')?.content || '';
+
+    const closeModal = () => {
+        modal?.classList.remove('show');
+        document.body.style.overflow = '';
+    };
+
+    document.querySelectorAll('.join-us-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const activityTitle = btn.dataset.activityTitle || 'Activity';
+            const activityDate = btn.dataset.activityDate || '';
+            titleInput.value = activityTitle;
+            dateInput.value = activityDate;
+            summary.textContent = activityDate ? `You are booking a seat for ${activityTitle} (${activityDate}).` : `You are booking a seat for ${activityTitle}.`;
+            feedback.textContent = '';
+            modal?.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    document.getElementById('join-us-modal-close')?.addEventListener('click', closeModal);
+    document.getElementById('join-us-cancel')?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const oldText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Booking...';
+        feedback.textContent = 'Submitting your booking...';
+
+        try {
+            const response = await fetch(base + '/activities/book-seat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(new FormData(form)).toString(),
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                const errorMessage = data.message || 'Unable to book a seat.';
+                feedback.textContent = errorMessage;
+                feedback.style.color = 'var(--danger)';
+                App.Toast.show(errorMessage, 'error');
+                return;
+            }
+
+            feedback.textContent = data.message || 'Seat booked successfully.';
+            feedback.style.color = 'var(--success)';
+            App.Toast.show(data.message || 'Seat booked successfully.', 'success');
+            form.reset();
+            closeModal();
+        } catch (err) {
+            feedback.textContent = err.message || 'Booking failed.';
+            feedback.style.color = 'var(--danger)';
+            App.Toast.show(err.message || 'Booking failed.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = oldText;
+        }
+    });
+});
+</script>
 
 <?php View::includeLayout('footer'); ?>

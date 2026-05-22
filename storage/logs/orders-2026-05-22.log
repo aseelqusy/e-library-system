@@ -242,3 +242,108 @@
 [2026-05-22 11:54:25.000000] Orders table ensured successfully | []
 [2026-05-22 11:54:27.000000] Order::ensureTable() checking orders table | []
 [2026-05-22 11:54:27.000000] Orders table ensured successfully | []
+[2026-05-22 13:42:20.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:42:20.000000] Orders table ensured successfully | []
+[2026-05-22 13:42:29.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:42:29.000000] Orders table ensured successfully | []
+[2026-05-22 13:42:40.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:42:40.000000] Orders table ensured successfully | []
+[2026-05-22 13:42:44.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:42:44.000000] Orders table ensured successfully | []
+[2026-05-22 13:53:21.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:53:21.000000] Orders table ensured successfully | []
+[2026-05-22 13:53:24.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:53:24.000000] Orders table ensured successfully | []
+[2026-05-22 13:53:29.000000] Order buy request started | {"user_id":11,"book_id":50,"quantity":1}
+[2026-05-22 13:53:29.000000] Book retrieved | {"book_id":50,"title":"Sapiens: A Brief History of Humankind","available":299,"price":"15.99"}
+[2026-05-22 13:53:29.000000] Creating order record | {"user_id":11,"book_id":50,"quantity":1,"unit_price":15.99,"total_price":15.99}
+[2026-05-22 13:53:29.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:53:29.000000] Orders table ensured successfully | []
+[2026-05-22 13:53:29.000000] Orders table verified before transaction | []
+[2026-05-22 13:53:29.000000] Transaction started | []
+[2026-05-22 13:53:29.000000] Order::create() called | {"user_id":11,"book_id":50,"quantity":1,"unit_price":15.99,"total_price":15.99,"status":"paid"}
+[2026-05-22 13:53:29.000000] Executing order insert statement | {"user_id":11,"book_id":50,"quantity":1,"unit_price":15.99,"total_price":15.99,"status":"paid"}
+[2026-05-22 13:53:29.000000] Order inserted successfully | {"order_id":24,"user_id":11}
+[2026-05-22 13:53:29.000000] Order created successfully | {"book_id":50,"quantity":1}
+[2026-05-22 13:53:29.000000] Adjusting book availability | {"book_id":50,"delta":-1}
+[2026-05-22 13:53:29.000000] Book availability adjusted | {"book_id":50}
+[2026-05-22 13:53:29.000000] Transaction committed successfully | {"book_id":50}
+[2026-05-22 13:53:29.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:53:29.000000] Orders table ensured successfully | []
+[2026-05-22 13:53:40.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:53:40.000000] Orders table ensured successfully | []
+[2026-05-22 13:53:45.000000] Order buy request started | {"user_id":11,"book_id":52,"quantity":1}
+[2026-05-22 13:53:45.000000] Book retrieved | {"book_id":52,"title":"The Disease and the Cure","available":49,"price":"18.00"}
+[2026-05-22 13:53:45.000000] Creating order record | {"user_id":11,"book_id":52,"quantity":1,"unit_price":18,"total_price":18}
+[2026-05-22 13:53:45.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:53:45.000000] Orders table ensured successfully | []
+[2026-05-22 13:53:45.000000] Orders table verified before transaction | []
+[2026-05-22 13:53:45.000000] Transaction started | []
+[2026-05-22 13:53:45.000000] Order::create() called | {"user_id":11,"book_id":52,"quantity":1,"unit_price":18,"total_price":18,"status":"paid"}
+[2026-05-22 13:53:45.000000] Executing order insert statement | {"user_id":11,"book_id":52,"quantity":1,"unit_price":18,"total_price":18,"status":"paid"}
+[2026-05-22 13:53:45.000000] Order inserted successfully | {"order_id":25,"user_id":11}
+[2026-05-22 13:53:45.000000] Order created successfully | {"book_id":52,"quantity":1}
+[2026-05-22 13:53:45.000000] Adjusting book availability | {"book_id":52,"delta":-1}
+[2026-05-22 13:53:45.000000] Book availability adjusted | {"book_id":52}
+[2026-05-22 13:53:45.000000] Transaction committed successfully | {"book_id":52}
+[2026-05-22 13:53:45.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:53:45.000000] Orders table ensured successfully | []
+[2026-05-22 13:57:01.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:57:01.000000] Orders table ensured successfully | []
+[2026-05-22 13:57:04.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:57:04.000000] Orders table ensured successfully | []
+[2026-05-22 13:57:14.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:57:14.000000] Orders table ensured successfully | []
+[2026-05-22 13:57:18.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:57:18.000000] Orders table ensured successfully | []
+[2026-05-22 13:57:36.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:57:36.000000] Orders table ensured successfully | []
+[2026-05-22 13:57:44.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:57:44.000000] Orders table ensured successfully | []
+[2026-05-22 13:57:46.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:57:46.000000] Orders table ensured successfully | []
+[2026-05-22 13:57:54.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 13:57:54.000000] Orders table ensured successfully | []
+[2026-05-22 14:00:18.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:00:18.000000] Orders table ensured successfully | []
+[2026-05-22 14:00:18.000000] Order::create() called | {"user_id":11,"book_id":50,"quantity":1,"unit_price":15.99,"total_price":15.99,"status":"paid"}
+[2026-05-22 14:00:18.000000] Executing order insert statement | {"user_id":11,"book_id":50,"quantity":1,"unit_price":15.99,"total_price":15.99,"status":"paid"}
+[2026-05-22 14:00:18.000000] Order inserted successfully | {"order_id":26,"user_id":11}
+[2026-05-22 14:00:19.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:00:19.000000] Orders table ensured successfully | []
+[2026-05-22 14:00:58.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:00:58.000000] Orders table ensured successfully | []
+[2026-05-22 14:01:00.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:01:00.000000] Orders table ensured successfully | []
+[2026-05-22 14:02:19.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:02:19.000000] Orders table ensured successfully | []
+[2026-05-22 14:02:22.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:02:22.000000] Orders table ensured successfully | []
+[2026-05-22 14:06:54.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:06:54.000000] Orders table ensured successfully | []
+[2026-05-22 14:06:58.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:06:58.000000] Orders table ensured successfully | []
+[2026-05-22 14:07:06.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:07:06.000000] Orders table ensured successfully | []
+[2026-05-22 14:07:07.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:07:07.000000] Orders table ensured successfully | []
+[2026-05-22 14:07:59.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:07:59.000000] Orders table ensured successfully | []
+[2026-05-22 14:08:01.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:08:01.000000] Orders table ensured successfully | []
+[2026-05-22 14:20:13.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:20:13.000000] Orders table ensured successfully | []
+[2026-05-22 14:20:28.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:20:28.000000] Orders table ensured successfully | []
+[2026-05-22 14:20:40.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:20:40.000000] Orders table ensured successfully | []
+[2026-05-22 14:21:06.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:21:06.000000] Orders table ensured successfully | []
+[2026-05-22 14:22:25.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:22:25.000000] Orders table ensured successfully | []
+[2026-05-22 14:22:31.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:22:31.000000] Orders table ensured successfully | []
+[2026-05-22 14:25:54.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:25:54.000000] Orders table ensured successfully | []
+[2026-05-22 14:31:23.000000] Order::ensureTable() checking orders table | []
+[2026-05-22 14:31:23.000000] Orders table ensured successfully | []

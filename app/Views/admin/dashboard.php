@@ -1,3 +1,26 @@
+<?php
+$viewData = get_defined_vars();
+$title = $viewData['title'] ?? 'Admin Dashboard';
+$totalBooks = $viewData['totalBooks'] ?? 0;
+$totalUsers = $viewData['totalUsers'] ?? 0;
+$activeBorrows = $viewData['activeBorrows'] ?? 0;
+$overdueCount = $viewData['overdueCount'] ?? 0;
+$totalCategories = $viewData['totalCategories'] ?? 0;
+$totalReviews = $viewData['totalReviews'] ?? 0;
+$totalWishlists = $viewData['totalWishlists'] ?? 0;
+$totalBorrows = $viewData['totalBorrows'] ?? 0;
+$paidOrders = $viewData['paidOrders'] ?? 0;
+$totalEarnings = $viewData['totalEarnings'] ?? 0;
+$monthEarnings = $viewData['monthEarnings'] ?? 0;
+$booksThisMonth = $viewData['booksThisMonth'] ?? 0;
+$booksLastMonth = $viewData['booksLastMonth'] ?? 0;
+$usersThisMonth = $viewData['usersThisMonth'] ?? 0;
+$usersLastMonth = $viewData['usersLastMonth'] ?? 0;
+$borrowsThisMonth = $viewData['borrowsThisMonth'] ?? 0;
+$borrowsLastMonth = $viewData['borrowsLastMonth'] ?? 0;
+$borrowChart = $viewData['borrowChart'] ?? ['labels' => [], 'data' => []];
+$categoryChart = $viewData['categoryChart'] ?? [];
+?>
 <?php View::includeLayout('header', ['title' => $title]); ?>
 <?php View::includeLayout('navbar'); ?>
 
@@ -81,6 +104,33 @@
                 <div>
                     <div class="kpi-value" data-count="<?= $totalBorrows ?>"><?= $totalBorrows ?></div>
                     <div class="kpi-label">Total Borrows</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-top:16px;">
+            <div class="kpi-card glass-card">
+                <div class="kpi-icon purple">💰</div>
+                <div>
+                    <div class="kpi-value"><?= '$' . number_format((float)($totalEarnings ?? 0), 2) ?></div>
+                    <div class="kpi-label">Total Earnings</div>
+                    <div class="kpi-trend up"><?= (int)($paidOrders ?? 0) ?> paid orders</div>
+                </div>
+            </div>
+            <div class="kpi-card glass-card">
+                <div class="kpi-icon cyan">📆</div>
+                <div>
+                    <div class="kpi-value"><?= '$' . number_format((float)($monthEarnings ?? 0), 2) ?></div>
+                    <div class="kpi-label">This Month</div>
+                    <div class="kpi-trend">Paid sales revenue</div>
+                </div>
+            </div>
+            <div class="kpi-card glass-card">
+                <div class="kpi-icon amber">🧾</div>
+                <div>
+                    <div class="kpi-value" data-count="<?= (int)($paidOrders ?? 0) ?>"><?= (int)($paidOrders ?? 0) ?></div>
+                    <div class="kpi-label">Paid Purchases</div>
+                    <div class="kpi-trend">Completed orders</div>
                 </div>
             </div>
         </div>

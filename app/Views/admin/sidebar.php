@@ -1,5 +1,5 @@
 <!-- Admin Sidebar Partial -->
-<aside class="admin-sidebar" role="navigation" aria-label="Admin navigation">
+<aside class="admin-sidebar" aria-label="Admin navigation">
     <div class="sidebar-section">
         <div class="sidebar-label">Overview</div>
         <a href="<?= url('admin/dashboard') ?>" class="sidebar-link <?= isActive('admin') ?: isActive('admin/dashboard') ?>">
@@ -22,6 +22,15 @@
         </a>
         <a href="<?= url('admin/reviews') ?>" class="sidebar-link <?= isActive('admin/reviews') ?>">
             <span class="link-icon">💬</span> Reviews
+        </a>
+        <a href="<?= url('admin/messages') ?>" class="sidebar-link <?= isActive('admin/messages') ?>">
+            <span class="link-icon">✉️</span> Messages
+        </a>
+        <a href="<?= url('admin/purchases') ?>" class="sidebar-link <?= isActive('admin/purchases') ?>">
+            <span class="link-icon">🛒</span> Purchases
+        </a>
+        <a href="<?= url('admin/activities') ?>" class="sidebar-link <?= isActive('admin/activities') ?>">
+            <span class="link-icon">🎟️</span> Activities
         </a>
     </div>
     <div class="sidebar-section">

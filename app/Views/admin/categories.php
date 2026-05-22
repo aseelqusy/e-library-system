@@ -65,8 +65,8 @@
                     <textarea name="description" class="form-control" rows="2" placeholder="Brief description…"></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Icon (emoji)</label>
-                    <input type="text" name="icon" class="form-control" placeholder="📁" maxlength="4">
+                    <label class="form-label">Icon</label>
+                    <input type="text" name="icon" class="form-control" placeholder="Folder icon or symbol" maxlength="20">
                 </div>
             </div>
             <div class="modal-footer">
@@ -99,8 +99,8 @@
                     <textarea name="description" id="edit-cat-description" class="form-control" rows="2"></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Icon (emoji)</label>
-                    <input type="text" name="icon" id="edit-cat-icon" class="form-control" maxlength="4">
+                    <label class="form-label">Icon</label>
+                    <input type="text" name="icon" id="edit-cat-icon" class="form-control" maxlength="20">
                 </div>
             </div>
             <div class="modal-footer">

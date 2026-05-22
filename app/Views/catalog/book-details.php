@@ -22,7 +22,6 @@ foreach ($reviews as $candidate) {
     }
 }
 ?>
-?>
 
     <div class="page-background"></div>
     <div class="page-wrapper" style="padding-top: var(--navbar-height);">
@@ -39,9 +38,10 @@ foreach ($reviews as $candidate) {
                                  loading="lazy"
                                  data-book-id="<?= $book['id'] ?>"
                                  data-isbn="<?= e($book['isbn'] ?? '') ?>"
-                                 onerror="this.style.display='none'; this.parentElement.innerHTML='📖';">
+                                 onerror="this.remove(); this.parentElement.querySelector('.book-cover-fallback').style.display='flex';">
+                            <div class="book-cover-fallback" style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-size:2rem;">📖</div>
                         <?php else: ?>
-                            📖
+                            <div class="book-cover-fallback" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;">📖</div>
                         <?php endif; ?>
                     </div>
 
@@ -111,11 +111,12 @@ foreach ($reviews as $candidate) {
 
                         <div class="glass-card buy-panel" style="padding:16px;margin-bottom:24px;">
                             <?php if (Auth::check()): ?>
-                                <form id="buy-book-form" class="buy-book-form" data-book-id="<?= (int)$book['id'] ?>">
+                                <form id="buy-book-form" class="buy-book-form" data-book-id="<?= (int)$book['id'] ?>" method="GET" action="<?= url('payment/checkout/' . (int)$book['id']) ?>">
                                     <label class="form-label" for="buy-quantity">Buy Quantity</label>
                                     <div class="flex gap-2" style="align-items:center;flex-wrap:wrap;">
                                         <input
                                             id="buy-quantity"
+                                            name="quantity"
                                             type="number"
                                             class="form-control"
                                             style="max-width:120px;"
@@ -217,9 +218,10 @@ foreach ($reviews as $candidate) {
                                              data-book-id="<?= $s['id'] ?>"
                                              data-isbn="<?= e($s['isbn'] ?? '') ?>"
                                              style="width:100%; height:100%; object-fit:cover;"
-                                             onerror="this.style.display='none'; this.parentElement.innerHTML='📖';">
+                                             onerror="this.remove(); this.parentElement.querySelector('.book-cover-fallback').style.display='flex';">
+                                        <div class="book-cover-fallback" style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-size:2rem;">📖</div>
                                     <?php else: ?>
-                                        📖
+                                        <div class="book-cover-fallback" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;">📖</div>
                                     <?php endif; ?>
                                 </div>
                                 <div class="book-info">
@@ -240,15 +242,25 @@ foreach ($reviews as $candidate) {
      <script>
          document.addEventListener('DOMContentLoaded', () => {
              // Handle buy form submission
-              const buyForm = document.getElementById('buy-book-form');
-              if (buyForm) {
+             const buyForm = document.getElementById('buy-book-form');
+             const buyQty = document.getElementById('buy-quantity');
+             const buyBtn = document.getElementById('buy-now-btn');
+             const buyFeedback = document.getElementById('buy-feedback');
+             if (buyForm && buyQty && buyBtn) {
                  buyForm.addEventListener('submit', (e) => {
                      e.preventDefault();
-                     const bookId = buyForm.dataset.bookId;
-                      const quantity = parseInt(document.getElementById('buy-quantity')?.value || '1', 10) || 1;
 
-                     // Redirect to payment checkout page
-                      window.location.href = '<?= url('payment/checkout') ?>/' + bookId + '?quantity=' + encodeURIComponent(quantity);
+                     const qty = parseInt(buyQty.value, 10) || 0;
+                     if (qty < 1) {
+                         if (buyFeedback) {
+                             buyFeedback.textContent = 'Please choose a valid quantity.';
+                             buyFeedback.style.color = 'var(--danger)';
+                         }
+                         return;
+                     }
+
+                     const bookId = buyForm.dataset.bookId;
+                     window.location.href = '<?= url('payment/checkout') ?>/' + bookId + '?quantity=' + encodeURIComponent(qty);
                  });
              }
 
@@ -269,62 +281,10 @@ foreach ($reviews as $candidate) {
             const formTitle = document.getElementById('review-form-title');
             const base = document.querySelector('meta[name="base-url"]')?.content || '';
             const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            const buyQty = document.getElementById('buy-quantity');
-            const buyBtn = document.getElementById('buy-now-btn');
-            const buyFeedback = document.getElementById('buy-feedback');
-
             if (!reviewForm || !starInput || !submitBtn || !commentInput) {
                 // Reviews can be hidden for guests; buy flow still needs to initialize.
             }
 
-            if (buyForm && buyQty && buyBtn) {
-                buyForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-                    const qty = parseInt(buyQty.value, 10) || 0;
-                    if (qty < 1) {
-                        buyFeedback.textContent = 'Please choose a valid quantity.';
-                        buyFeedback.style.color = 'var(--danger)';
-                        return;
-                    }
-
-                    buyBtn.disabled = true;
-                    const oldLabel = buyBtn.textContent;
-                    buyBtn.textContent = 'Processing...';
-                    buyFeedback.textContent = 'Submitting your order...';
-                    buyFeedback.style.color = 'var(--text-muted)';
-
-                    try {
-                        const response = await fetch(`${base}/order/buy`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: new URLSearchParams({
-                                book_id: buyForm.dataset.bookId,
-                                quantity: String(qty),
-                                _token: token,
-                            }).toString(),
-                        });
-                        const data = await response.json();
-
-                        if (!response.ok || !data.success) {
-                            throw new Error(data.message || 'Unable to complete purchase.');
-                        }
-
-                        buyFeedback.textContent = data.message || 'Purchase completed.';
-                        buyFeedback.style.color = 'var(--success)';
-                        App.Toast.show(data.message || 'Purchase completed.', 'success');
-                        if (data.redirect) {
-                            window.location.href = data.redirect;
-                        }
-                    } catch (error) {
-                        buyFeedback.textContent = error.message || 'Purchase failed.';
-                        buyFeedback.style.color = 'var(--danger)';
-                        App.Toast.show(error.message || 'Purchase failed.', 'error');
-                    } finally {
-                        buyBtn.disabled = false;
-                        buyBtn.textContent = oldLabel;
-                    }
-                });
-            }
 
             if (!reviewForm || !starInput || !submitBtn || !commentInput) {
                 return;

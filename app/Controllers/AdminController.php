@@ -80,6 +80,31 @@ class AdminController extends Controller {
         require_once APP_PATH . '/Models/Review.php';
         require_once APP_PATH . '/Models/Wishlist.php';
 
+        $db = Database::getInstance();
+        $db->exec(
+            "CREATE TABLE IF NOT EXISTS orders (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                book_id INT NOT NULL,
+                quantity INT NOT NULL DEFAULT 1,
+                unit_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                total_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                status ENUM('pending','paid','cancelled','refunded') NOT NULL DEFAULT 'paid',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_orders_user (user_id),
+                INDEX idx_orders_book (book_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+        $orderStatsStmt = $db->query(
+            "SELECT
+                COUNT(*) AS paid_orders,
+                COALESCE(SUM(total_price), 0) AS total_earnings,
+                COALESCE(SUM(CASE WHEN created_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01') THEN total_price ELSE 0 END), 0) AS month_earnings
+             FROM orders
+             WHERE status = 'paid'"
+        );
+        $orderStats = $orderStatsStmt->fetch() ?: [];
+
         $startThis = (new DateTimeImmutable('first day of this month'))->format('Y-m-d');
         $startNext = (new DateTimeImmutable('first day of next month'))->format('Y-m-d');
         $startLast = (new DateTimeImmutable('first day of last month'))->format('Y-m-d');
@@ -105,6 +130,9 @@ class AdminController extends Controller {
             'totalReviews'     => Review::count(),
             'totalWishlists'   => Wishlist::count(),
             'totalBorrows'     => Borrow::count(),
+            'paidOrders'       => (int)($orderStats['paid_orders'] ?? 0),
+            'totalEarnings'    => (float)($orderStats['total_earnings'] ?? 0),
+            'monthEarnings'    => (float)($orderStats['month_earnings'] ?? 0),
             'booksThisMonth'   => $booksThisMonth,
             'booksLastMonth'   => $booksLastMonth,
             'usersThisMonth'   => $usersThisMonth,
@@ -115,6 +143,121 @@ class AdminController extends Controller {
             'categoryChart'    => $categorySeries,
             'recentBorrows'    => $recentBorrows,
             'layout'           => 'admin',
+        ]);
+    }
+
+    public function messages(): void {
+        $this->ensureAdmin();
+
+        $db = Database::getInstance();
+        $db->exec(
+            "CREATE TABLE IF NOT EXISTS contact_messages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(120) NOT NULL,
+                email VARCHAR(180) NOT NULL,
+                subject VARCHAR(180) NOT NULL,
+                message TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+        $stmt = $db->query("SELECT * FROM contact_messages ORDER BY created_at DESC, id DESC");
+        $messages = $stmt ? $stmt->fetchAll() : [];
+
+        $this->view('admin/messages', [
+            'title' => 'Contact Messages',
+            'messages' => $messages,
+            'layout' => 'admin',
+        ]);
+    }
+
+    public function purchases(): void {
+        $this->ensureAdmin();
+
+        $db = Database::getInstance();
+        $db->exec(
+            "CREATE TABLE IF NOT EXISTS orders (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                book_id INT NOT NULL,
+                quantity INT NOT NULL DEFAULT 1,
+                unit_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                total_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                status ENUM('pending','paid','cancelled','refunded') NOT NULL DEFAULT 'paid',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_orders_user (user_id),
+                INDEX idx_orders_book (book_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+
+        $statsStmt = $db->query(
+            "SELECT
+                COUNT(*) AS paid_orders,
+                COALESCE(SUM(total_price), 0) AS total_earnings
+             FROM orders
+             WHERE status = 'paid'"
+        );
+        $stats = $statsStmt ? $statsStmt->fetch() : [];
+
+        $stmt = $db->query(
+            "SELECT o.*, u.name AS user_name, u.email AS user_email, b.title AS book_title, b.author AS book_author
+             FROM orders o
+             JOIN users u ON u.id = o.user_id
+             JOIN books b ON b.id = o.book_id
+             WHERE o.status = 'paid'
+             ORDER BY o.created_at DESC, o.id DESC"
+        );
+        $orders = $stmt ? $stmt->fetchAll() : [];
+
+        $this->view('admin/purchases', [
+            'title' => 'Purchases',
+            'orders' => $orders,
+            'stats' => [
+                'paid_orders' => (int)($stats['paid_orders'] ?? 0),
+                'total_earnings' => (float)($stats['total_earnings'] ?? 0),
+            ],
+            'layout' => 'admin',
+        ]);
+    }
+
+    public function activities(): void {
+        $this->ensureAdmin();
+
+        $db = Database::getInstance();
+        $db->exec(
+            "CREATE TABLE IF NOT EXISTS activity_bookings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                activity_title VARCHAR(180) NOT NULL,
+                activity_date VARCHAR(40) NULL,
+                name VARCHAR(120) NOT NULL,
+                email VARCHAR(190) NOT NULL,
+                phone VARCHAR(50) NOT NULL,
+                seats INT NOT NULL DEFAULT 1,
+                message TEXT NULL,
+                user_id INT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_activity_title (activity_title),
+                INDEX idx_user_id (user_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+
+        $statsStmt = $db->query(
+            "SELECT COUNT(*) AS total_bookings, COALESCE(SUM(seats), 0) AS total_seats FROM activity_bookings"
+        );
+        $stats = $statsStmt ? $statsStmt->fetch() : [];
+
+        $stmt = $db->query(
+            "SELECT * FROM activity_bookings ORDER BY created_at DESC, id DESC"
+        );
+        $bookings = $stmt ? $stmt->fetchAll() : [];
+
+        $this->view('admin/activities', [
+            'title' => 'Activity Bookings',
+            'bookings' => $bookings,
+            'stats' => [
+                'total_bookings' => (int)($stats['total_bookings'] ?? 0),
+                'total_seats' => (int)($stats['total_seats'] ?? 0),
+            ],
+            'layout' => 'admin',
         ]);
     }
 

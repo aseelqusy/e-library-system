@@ -307,10 +307,47 @@ const App = (() => {
     const Notifications = {
         pollTimer: null,
 
+        _setUnreadState(unread) {
+            const badge = document.querySelector('.notification-badge');
+            const headerChip = document.querySelector('.notification-dropdown-header .chip');
+
+            if (badge) {
+                if (unread > 0) {
+                    badge.style.display = '';
+                    badge.textContent = String(unread);
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            if (headerChip) {
+                headerChip.style.display = unread > 0 ? '' : 'none';
+                headerChip.textContent = unread > 0 ? `${unread} new` : '';
+            }
+        },
+
+        async _clearUnread() {
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            try {
+                const response = await fetch(BASE + '/api/notifications/clear', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ _token: csrf }).toString()
+                });
+                const data = await response.json();
+                return !!(data && data.success);
+            } catch (err) {
+                console.error('Failed to clear notifications', err);
+                return false;
+            }
+        },
+
         async refresh() {
             const btn = document.querySelector('.notification-btn');
             const dropdown = document.querySelector('.notification-dropdown');
-            const badge = document.querySelector('.notification-badge');
             const list = document.querySelector('.notification-dropdown-list');
             if (!btn || !dropdown || !list) return;
 
@@ -320,14 +357,7 @@ const App = (() => {
                 if (!data || !data.success) return;
 
                 const unread = Number(data.unreadCount || 0);
-                if (badge) {
-                    if (unread > 0) {
-                        badge.style.display = '';
-                        badge.textContent = String(unread);
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
+                this._setUnreadState(unread);
 
                 if (Array.isArray(data.notifications)) {
                     if (!data.notifications.length) {
@@ -349,38 +379,26 @@ const App = (() => {
         init() {
             const btn = document.querySelector('.notification-btn');
             const dropdown = document.querySelector('.notification-dropdown');
-            const badge = document.querySelector('.notification-badge');
             const markReadBtn = document.querySelector('.notification-mark-read');
             if (!btn || !dropdown) return;
 
-            btn.addEventListener('click', e => {
+            btn.addEventListener('click', async e => {
                 e.stopPropagation();
                 dropdown.classList.toggle('show');
 
                 if (dropdown.classList.contains('show')) {
+                    this._setUnreadState(0);
+                    document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
+                    await this._clearUnread();
                     this.refresh();
                 }
             });
 
             markReadBtn?.addEventListener('click', async e => {
                 e.stopPropagation();
-                const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
-                try {
-                    const response = await fetch(BASE + '/api/notifications/clear', {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({ _token: csrf }).toString()
-                    });
-                    const data = await response.json();
-                    if (data && data.success) {
-                        document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
-                        if (badge) badge.style.display = 'none';
-                    }
-                } catch (err) {
-                    console.error('Failed to clear notifications', err);
+                if (await this._clearUnread()) {
+                    document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
+                    this._setUnreadState(0);
                 }
             });
 
@@ -392,7 +410,15 @@ const App = (() => {
 
             this.refresh();
             if (this.pollTimer) clearInterval(this.pollTimer);
-            this.pollTimer = setInterval(() => this.refresh(), 30000);
+            this.pollTimer = setInterval(() => this.refresh(), 15000);
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    this.refresh();
+                }
+            });
+
+            window.addEventListener('focus', () => this.refresh());
         },
 
         _formatDate(dateString) {

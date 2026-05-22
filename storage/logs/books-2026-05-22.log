@@ -28,3 +28,13 @@
 [2026-05-22 03:14:01.000000] Book availability updated successfully | {"book_id":20,"delta":-1,"rows_affected":1}
 [2026-05-22 10:13:34.000000] Book::adjustAvailable() called | {"book_id":52,"delta":-1}
 [2026-05-22 10:13:34.000000] Book availability updated successfully | {"book_id":52,"delta":-1,"rows_affected":1}
+[2026-05-22 13:42:35.000000] Book::adjustAvailable() called | {"book_id":50,"delta":-1}
+[2026-05-22 13:42:35.000000] Book availability updated successfully | {"book_id":50,"delta":-1,"rows_affected":1}
+[2026-05-22 13:53:29.000000] Book::adjustAvailable() called | {"book_id":50,"delta":-1}
+[2026-05-22 13:53:29.000000] Book availability updated successfully | {"book_id":50,"delta":-1,"rows_affected":1}
+[2026-05-22 13:53:45.000000] Book::adjustAvailable() called | {"book_id":52,"delta":-1}
+[2026-05-22 13:53:45.000000] Book availability updated successfully | {"book_id":52,"delta":-1,"rows_affected":1}
+[2026-05-22 13:56:52.000000] Book::adjustAvailable() called | {"book_id":50,"delta":-1}
+[2026-05-22 13:56:52.000000] Book availability updated successfully | {"book_id":50,"delta":-1,"rows_affected":1}
+[2026-05-22 14:00:18.000000] Book::adjustAvailable() called | {"book_id":50,"delta":-1}
+[2026-05-22 14:00:18.000000] Book availability updated successfully | {"book_id":50,"delta":-1,"rows_affected":1}

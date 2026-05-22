@@ -68,6 +68,11 @@ class PaymentController extends Controller {
         $bookId = (int)($_POST['book_id'] ?? 0);
         $quantity = (int)($_POST['quantity'] ?? 1);
         $paymentMethod = trim($_POST['payment_method'] ?? 'card');
+        $cardName = trim($_POST['card_name'] ?? '');
+        $cardNumber = preg_replace('/\s+/', '', (string)($_POST['card_number'] ?? ''));
+        $cardExpiry = trim($_POST['card_expiry'] ?? '');
+        $cardCvv = trim($_POST['card_cvv'] ?? '');
+        $cardZip = trim($_POST['card_zip'] ?? '');
         $userId = (int)Auth::id();
 
         logDebug('Payment processing started', [
@@ -132,6 +137,24 @@ class PaymentController extends Controller {
         if (!in_array($paymentMethod, ['card', 'paypal', 'transfer'], true)) {
             logDebug('Invalid payment method', ['payment_method' => $paymentMethod], 'payment');
             $this->json(['success' => false, 'message' => 'Invalid payment method.'], 422);
+        }
+
+        if ($paymentMethod === 'card') {
+            if ($cardName === '' || $cardNumber === '' || $cardExpiry === '' || $cardCvv === '' || $cardZip === '') {
+                $this->json(['success' => false, 'message' => 'Please fill in all card details before paying.'], 422);
+            }
+
+            if (!preg_match('/^\d{13,19}$/', $cardNumber)) {
+                $this->json(['success' => false, 'message' => 'Card number must contain 13 to 19 digits.'], 422);
+            }
+
+            if (!preg_match('/^(0[1-9]|1[0-2])\/(\d{2})$/', $cardExpiry)) {
+                $this->json(['success' => false, 'message' => 'Card expiry must be in MM/YY format.'], 422);
+            }
+
+            if (!preg_match('/^\d{3,4}$/', $cardCvv)) {
+                $this->json(['success' => false, 'message' => 'CVV must be 3 or 4 digits.'], 422);
+            }
         }
 
         // Process payment (mock implementation)

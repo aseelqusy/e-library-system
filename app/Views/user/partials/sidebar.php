@@ -14,6 +14,10 @@ $currentPage = $current_page ?? '';
             <i class="fas fa-book"></i>
             <span>My Borrows</span>
         </a>
+        <a href="<?= url('user/reviews') ?>" class="sidebar-item <?= $currentPage === 'reviews' ? 'active' : '' ?>">
+            <i class="fas fa-star"></i>
+            <span>My Reviews</span>
+        </a>
         <a href="<?= url('user/orders') ?>" class="sidebar-item <?= $currentPage === 'orders' ? 'active' : '' ?>">
             <i class="fas fa-shopping-cart"></i>
             <span>My Orders</span>

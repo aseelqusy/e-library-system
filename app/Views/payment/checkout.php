@@ -35,8 +35,9 @@ $totalPrice = $unitPrice * $quantity;
                                      <img src="<?= e($coverPath) ?>" 
                                           alt="<?= e($book['title']) ?> cover" 
                                           data-isbn="<?= e($book['isbn'] ?? '') ?>"
-                                          style="width:100%;height:100%;object-fit:cover;"
-                                          onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\"width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;\">📖</div>';">
+                                          class="checkout-cover-image"
+                                          style="width:100%;height:100%;object-fit:cover;">
+                                     <div class="book-cover-fallback" style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-size:2rem;">📖</div>
                                  <?php else: ?>
                                      <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;">📖</div>
                                  <?php endif; ?>
@@ -83,7 +84,7 @@ $totalPrice = $unitPrice * $quantity;
                                 <label class="form-label">Quantity</label>
                                 <div style="display:flex;gap:8px;align-items:center;">
                                     <button type="button" class="btn btn-secondary btn-sm" id="qty-minus" onclick="changeQuantity(-1)">−</button>
-                                    <input type="number" id="quantity-input-field" class="form-control" style="max-width:80px;text-align:center;" min="1" max="<?= (int)($book['available'] ?? 10) ?>" value="<?= (int)$quantity ?>" onchange="updateQuantity()">
+                                    <input type="number" id="quantity-input-field" class="form-control" style="max-width:80px;text-align:center;" aria-label="Quantity" min="1" max="<?= (int)($book['available'] ?? 10) ?>" value="<?= (int)$quantity ?>" onchange="updateQuantity()">
                                     <button type="button" class="btn btn-secondary btn-sm" id="qty-plus" onclick="changeQuantity(1)">+</button>
                                     <span class="text-muted text-sm" style="margin-left:auto;">Max: <?= (int)($book['available'] ?? 1) ?></span>
                                 </div>
@@ -115,6 +116,40 @@ $totalPrice = $unitPrice * $quantity;
                                         </span>
                                     </label>
                                 </div>
+                            </div>
+
+                            <!-- Card Details -->
+                            <div class="glass-card" id="card-details" style="margin-bottom:20px;padding:16px;border:1px solid var(--border);">
+                                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+                                    <label class="form-label" style="margin:0;">Card Details</label>
+                                    <span class="text-muted text-sm">Required for credit card payments</span>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label class="form-label" for="card_name">Name on Card</label>
+                                    <input type="text" id="card_name" name="card_name" class="form-control" placeholder="Jane Doe" autocomplete="cc-name">
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label class="form-label" for="card_number">Card Number</label>
+                                    <input type="text" id="card_number" name="card_number" class="form-control" placeholder="1234 5678 9012 3456" inputmode="numeric" autocomplete="cc-number" maxlength="19">
+                                </div>
+
+                                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">
+                                    <div class="form-group">
+                                        <label class="form-label" for="card_expiry">Expiry</label>
+                                        <input type="text" id="card_expiry" name="card_expiry" class="form-control" placeholder="MM/YY" autocomplete="cc-exp" maxlength="5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="card_cvv">CVV</label>
+                                        <input type="password" id="card_cvv" name="card_cvv" class="form-control" placeholder="123" inputmode="numeric" autocomplete="cc-csc" maxlength="4">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="card_zip">ZIP / Postal</label>
+                                        <input type="text" id="card_zip" name="card_zip" class="form-control" placeholder="10001" autocomplete="billing postal-code">
+                                    </div>
+                                </div>
+                                <p id="card-feedback" class="text-muted text-sm" style="margin:12px 0 0 0;"></p>
                             </div>
 
                             <!-- Terms -->
@@ -153,6 +188,60 @@ $totalPrice = $unitPrice * $quantity;
 let currentQuantity = <?= (int)$quantity ?>;
 const maxQuantity = <?= (int)($book['available'] ?? 1) ?>;
 const basePrice = <?= number_format($unitPrice, 2) ?>;
+const cardDetails = document.getElementById('card-details');
+const cardFeedback = document.getElementById('card-feedback');
+const cardFields = ['card_name', 'card_number', 'card_expiry', 'card_cvv', 'card_zip'];
+
+document.querySelectorAll('.checkout-cover-image').forEach((img) => {
+    img.addEventListener('error', () => {
+        img.remove();
+        img.parentElement.querySelector('.book-cover-fallback')?.style && (img.parentElement.querySelector('.book-cover-fallback').style.display = 'flex');
+    }, { once: true });
+});
+
+function getSelectedPaymentMethod() {
+    return document.querySelector('input[name="payment_method"]:checked')?.value || 'card';
+}
+
+function setCardRequired(isRequired) {
+    cardFields.forEach((fieldId) => {
+        const input = document.getElementById(fieldId);
+        if (!input) return;
+        input.required = isRequired;
+        if (!isRequired) {
+            input.setCustomValidity('');
+        }
+    });
+    if (cardDetails) {
+        cardDetails.style.display = isRequired ? 'block' : 'none';
+    }
+}
+
+function validateCardDetails() {
+    const name = document.getElementById('card_name')?.value.trim() || '';
+    const number = document.getElementById('card_number')?.value.replace(/\s+/g, '') || '';
+    const expiry = document.getElementById('card_expiry')?.value.trim() || '';
+    const cvv = document.getElementById('card_cvv')?.value.trim() || '';
+    const zip = document.getElementById('card_zip')?.value.trim() || '';
+
+    if (!name || !number || !expiry || !cvv || !zip) {
+        return 'Please fill in all card details.';
+    }
+
+    if (!/^\d{13,19}$/.test(number)) {
+        return 'Card number must contain 13 to 19 digits.';
+    }
+
+    if (!/^(0[1-9]|1[0-2])\/(\d{2})$/.test(expiry)) {
+        return 'Expiry must be in MM/YY format.';
+    }
+
+    if (!/^\d{3,4}$/.test(cvv)) {
+        return 'CVV must be 3 or 4 digits.';
+    }
+
+    return '';
+}
 
 function changeQuantity(delta) {
     const newQty = Math.max(1, Math.min(maxQuantity, currentQuantity + delta));
@@ -181,16 +270,32 @@ function updateQuantity() {
 
 function updatePaymentMethod(method) {
     console.log('Payment method selected:', method);
-    // Could update UI based on selected method (e.g., show card fields for card, etc.)
+    setCardRequired(method === 'card');
+    if (cardFeedback) {
+        cardFeedback.textContent = method === 'card' ? 'Please enter the card details to continue.' : '';
+    }
 }
 
 document.getElementById('payment-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const paymentMethod = getSelectedPaymentMethod();
     const termsCheck = document.getElementById('terms-check').checked;
     if (!termsCheck) {
         App.Toast.show('Please agree to the terms and conditions', 'error');
         return;
+    }
+
+    if (paymentMethod === 'card') {
+        const cardError = validateCardDetails();
+        if (cardError) {
+            if (cardFeedback) {
+                cardFeedback.textContent = cardError;
+                cardFeedback.style.color = 'var(--danger)';
+            }
+            App.Toast.show(cardError, 'error');
+            return;
+        }
     }
 
     const payButton = document.getElementById('pay-button');
@@ -235,6 +340,11 @@ document.getElementById('payment-form').addEventListener('submit', async (e) => 
         payButton.textContent = baseText;
         console.error('Payment error:', err);
     }
+});
+
+setCardRequired(getSelectedPaymentMethod() === 'card');
+document.querySelectorAll('input[name="payment_method"]').forEach((input) => {
+    input.addEventListener('change', () => updatePaymentMethod(input.value));
 });
 </script>
 
